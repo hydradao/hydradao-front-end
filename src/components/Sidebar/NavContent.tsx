@@ -1,5 +1,5 @@
 import { t, Trans } from "@lingui/macro";
-import { Box, Divider, Link, makeStyles, Paper, SvgIcon, Typography } from "@material-ui/core";
+import { Box, Divider, Grid, Link, makeStyles, Paper, SvgIcon, Typography } from "@material-ui/core";
 import { Icon, NavItem } from "@olympusdao/component-library";
 import React from "react";
 import { NavLink } from "react-router-dom";
@@ -43,60 +43,67 @@ const NavContent: React.VFC = () => {
 
           <div className="dapp-menu-links">
             <div className="dapp-nav" id="navbarNav">
-              {networkId === networks.MAINNET ? (
-                <>
-                  <NavItem to="/dashboard" icon="dashboard" label={t`Dashboard`} />
+              <NavItem to="/dashboard" icon="dashboard" label={t`Dashboard`} />
 
-                  <NavItem to="/bonds" icon="bond" label={t`Bond`}>
-                    <Bonds />
-                    <InverseBonds />
-                  </NavItem>
+              <NavItem to="/stake" icon="stake" label="Mint HYDR" />
 
-                  <NavItem to="/stake" icon="stake" label={t`Stake`} />
+              <NavItem to="/zap" icon="zap" label="Stake HYDR" />
 
-                  <NavItem to="/zap" icon="zap" label={t`Zap`} />
+              {Environment.isGiveEnabled() && <NavItem to="/give" icon="give" label="Realize prHYDR" />}
 
-                  {Environment.isGiveEnabled() && <NavItem to="/give" icon="give" label={t`Give`} />}
+              <NavItem to="/wrap" icon="wrap" label="Get/Repay WATER" />
 
-                  <NavItem to="/wrap" icon="wrap" label={t`Wrap`} />
+              <NavItem to="/wrappp" icon="wrap" label="WATER buyback" />
 
-                  <NavItem
-                    icon="bridge"
-                    label={t`Bridge`}
-                    href="https://synapseprotocol.com/?inputCurrency=gOHM&outputCurrency=gOHM&outputChain=43114"
-                  />
-
-                  <Box className="menu-divider">
-                    <Divider />
-                  </Box>
-
-                  <NavItem href="https://pro.olympusdao.finance/" icon="olympus" label={t`Olympus Pro`} />
-
-                  <Box className="menu-divider">
-                    <Divider />
-                  </Box>
-                </>
-              ) : (
-                <>
-                  <NavItem to="/wrap" icon="wrap" label={t`Wrap`} />
-
-                  <NavItem
-                    icon="bridge"
-                    label={t`Bridge`}
-                    href="https://synapseprotocol.com/?inputCurrency=gOHM&outputCurrency=gOHM&outputChain=43114"
-                  />
-                </>
-              )}
-
-              <NavItem href="https://forum.olympusdao.finance/" icon="forum" label={t`Forum`} />
-
-              <NavItem href="https://vote.olympusdao.finance/" icon="governance" label={t`Governance`} />
-
-              <NavItem href="https://docs.olympusdao.finance/" icon="docs" label={t`Docs`} />
-
-              <NavItem href="https://immunefi.com/bounty/olympus/" icon="bug-report" label={t`Bug Bounty`} />
-
-              <NavItem href="https://grants.olympusdao.finance/" icon="grants" label={t`Grants`} />
+              <Box className="menu-divider">
+                <Divider />
+              </Box>
+              <Box ml={3} mr={2} mt={1}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography>My Portfolio</Typography>
+                  </Grid>
+                  <Grid container item xs={6} justifyContent="flex-end">
+                    <Typography>$130.22</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>HYDR</Typography>
+                  </Grid>
+                  <Grid container item xs={6} justifyContent="flex-end">
+                    <Typography>$88.22</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>Staked HYDR</Typography>
+                  </Grid>
+                  <Grid container item xs={6} justifyContent="flex-end">
+                    <Typography>$88.22</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>prHYDR</Typography>
+                  </Grid>
+                  <Grid container item xs={6} justifyContent="flex-end">
+                    <Typography>$88.22</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>Claimable prHYDR</Typography>
+                  </Grid>
+                  <Grid container item xs={6} justifyContent="flex-end">
+                    <Typography>$88.22</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>WATER balance</Typography>
+                  </Grid>
+                  <Grid container item xs={6} justifyContent="flex-end">
+                    <Typography>$88.22</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography>borrowed WATER</Typography>
+                  </Grid>
+                  <Grid container item xs={6} justifyContent="flex-end">
+                    <Typography>$88.22</Typography>
+                  </Grid>
+                </Grid>
+              </Box>
             </div>
           </div>
         </div>
