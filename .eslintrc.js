@@ -13,14 +13,14 @@ module.exports = {
     },
   },
   extends: [
-    "plugin:prettier/recommended",
+    // "plugin:prettier/recommended",
     "plugin:react-hooks/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
   ],
   plugins: ["@typescript-eslint", "simple-import-sort", "unused-imports"],
   rules: {
-    "prettier/prettier": ["error"],
+    // "prettier/prettier": ["error"],
     "import/prefer-default-export": "off",
     "prefer-destructuring": "off",
     "prefer-template": "off",
