@@ -45,9 +45,9 @@ const NavContent: React.VFC = () => {
             <div className="dapp-nav" id="navbarNav">
               <NavItem to="/dashboard" icon="dashboard" label={t`Dashboard`} />
 
-              <NavItem to="/stake" icon="stake" label="Mint HYDR" />
+              <NavItem to="/mint" icon="stake" label="Mint HYDR" />
 
-              <NavItem to="/zap" icon="zap" label="Stake HYDR" />
+              <NavItem to="/stake" icon="zap" label="Stake HYDR" />
 
               {Environment.isGiveEnabled() && <NavItem to="/give" icon="give" label="Realize prHYDR" />}
 

@@ -168,3 +168,14 @@ export const TreasuryBalance: React.FC<AbstractedMetricProps> = props => {
 
   return <Metric {..._props} />;
 };
+
+export const CountDown: React.FC<AbstractedMetricProps> = props => {
+  const _props: MetricProps = {
+    ...props,
+    label: t`Count Down`,
+  };
+
+  _props.metric = "12:34:59";
+
+  return <Metric {..._props} />;
+};
