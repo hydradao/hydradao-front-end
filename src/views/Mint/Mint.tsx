@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useWeb3Context } from "src/hooks";
 import { usePathForNetwork } from "src/hooks/usePathForNetwork";
 
-import { ExternalStakePools } from "./components/ExternalStakePools/ExternalStakePools";
-import { StakeArea } from "./components/StakeArea/StakeArea";
+import { MintHistory } from "./components/MintHistory/MintHistory";
+import { MintArea } from "./components/MintArea/MintArea";
 
 const Stake: React.FC = () => {
   const navigate = useNavigate();
@@ -15,12 +15,12 @@ const Stake: React.FC = () => {
 
   return (
     <div id="stake-view">
-      <StakeArea />
+      <MintArea />
 
       {/* NOTE (appleseed-olyzaps) olyzaps disabled until v2 contracts */}
       {/* <ZapCta /> */}
 
-      <ExternalStakePools />
+      <MintHistory />
     </div>
   );
 };
