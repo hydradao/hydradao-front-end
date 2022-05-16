@@ -1,9 +1,8 @@
-import { t } from "@lingui/macro";
-import { Trans } from "@lingui/macro";
-import { Box, Divider, Grid, Zoom } from "@material-ui/core";
-import { Metric, MetricCollection, Paper } from "@olympusdao/component-library";
-import { PrimaryButton } from "@olympusdao/component-library";
+import { t, Trans } from "@lingui/macro";
+import { Box, Divider, Grid, Link, Zoom } from "@material-ui/core";
+import { Metric, MetricCollection, Paper, PrimaryButton } from "@olympusdao/component-library";
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { WalletConnectedGuard } from "src/components/WalletConnectedGuard";
 import { useWeb3Context } from "src/hooks/web3Context";
 import { CountDown, FloorPrice, MarketPrice, MintPrice } from "src/views/TreasuryDashboard/components/Metric/Metric";
@@ -46,10 +45,8 @@ export const MintArea: React.FC = () => {
               </MetricCollection>
             </Grid>
           </Box>
-        </Paper>
-      </Zoom>
-      <Zoom in={true}>
-        <Paper>
+
+          {/* Move the following into a seperate component */}
           <Box className="hero-metrics">
             <Paper className="ohm-card">
               <MetricCollection>
@@ -60,17 +57,27 @@ export const MintArea: React.FC = () => {
             </Paper>
           </Box>
           <HydraPriceGraph />
-        </Paper>
-      </Zoom>
-      <Zoom in={true}>
-        <Paper>
-          <Box justifyContent="center" alignItems="center" display="flex">
-            <WalletConnectedGuard message="Connect your wallet to mint Hydra">
-              <PrimaryButton size="large" style={{ fontSize: "1.2857rem" }} onClick={connect}>
-                <Trans>Buy Hydra</Trans>
-              </PrimaryButton>
-            </WalletConnectedGuard>
-          </Box>
+
+          {/* I'll move the following into a seperate component too */}
+          <WalletConnectedGuard message="Connect your wallet to mint HYDR">
+            <Box mt="16px">
+              <Link component={NavLink} to={`/mint/modal`}>
+                <PrimaryButton fullWidth>
+                  <Trans>Mint</Trans>
+                </PrimaryButton>
+              </Link>
+            </Box>
+
+            <StakeBalances />
+
+            <Divider color="secondary" />
+
+            <StakeNextRebaseAmount />
+
+            <StakeRebaseYield />
+
+            <StakeFiveDayYield />
+          </WalletConnectedGuard>
         </Paper>
       </Zoom>
     </>

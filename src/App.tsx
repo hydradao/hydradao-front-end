@@ -323,7 +323,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/mint" />} />
 
-              <Route path="/mint" element={<Mint />} />
+              <Route path="/mint/*" element={<Mint />} />
 
               <Route path="/stake" element={<Stake />} />
 
