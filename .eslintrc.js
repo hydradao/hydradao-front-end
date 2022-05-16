@@ -13,7 +13,7 @@ module.exports = {
     },
   },
   extends: [
-    // "plugin:prettier/recommended",
+    "plugin:prettier/recommended",
     "plugin:react-hooks/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -34,7 +34,7 @@ module.exports = {
     "no-nested-ternary": "off",
     "no-restricted-syntax": "off",
     "no-plusplus": "off",
-    // "simple-import-sort/imports": "error",
+    "simple-import-sort/imports": "error",
     // "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",

@@ -61,6 +61,11 @@ function TopBar({ theme, toggleTheme, handleDrawerToggle }: TopBarProps) {
         <Box display="flex" alignItems="center">
           <Link to={"/wallet"} state={{ prevPath: location.pathname }} style={{ marginRight: "0px" }}>
             <Button variant="contained" color="secondary">
+              <Typography>{t`Claim 13.33 prHYDR`}</Typography>
+            </Button>
+          </Link>
+          <Link to={"/wallet"} state={{ prevPath: location.pathname }} style={{ marginRight: "0px" }}>
+            <Button variant="contained" color="secondary">
               <SvgIcon component={WalletIcon} style={{ marginRight: "9px" }} />
               <Typography>{connected ? t`Wallet` : t`Connect`}</Typography>
             </Button>

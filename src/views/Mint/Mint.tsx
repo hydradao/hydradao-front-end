@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useWeb3Context } from "src/hooks";
 import { usePathForNetwork } from "src/hooks/usePathForNetwork";
 
-import { MintHistory } from "./components/MintHistory/MintHistory";
 import { MintArea } from "./components/MintArea/MintArea";
+import { MintHistory } from "./components/MintHistory/MintHistory";
 
 const Stake: React.FC = () => {
   const navigate = useNavigate();

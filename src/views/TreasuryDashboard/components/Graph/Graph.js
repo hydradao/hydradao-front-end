@@ -1,6 +1,7 @@
 import { t } from "@lingui/macro";
 import { useTheme } from "@material-ui/core/styles";
 import Chart from "src/components/Chart/Chart";
+import HydraChart from "src/components/Chart/HydraChart";
 import { formatCurrency, trim } from "src/helpers";
 import { useProtocolMetrics } from "src/hooks/useProtocolMetrics";
 
@@ -121,6 +122,37 @@ export const ProtocolOwnedLiquidityGraph = () => {
       expandedGraphStrokeColor={theme.palette.graphStrokeColor}
       headerSubText={`${data && trim(data[0].treasuryOhmDaiPOL, 2)}% `}
       stopColor={[["rgba(128, 204, 131, 1)", "rgba(128, 204, 131, 0)"]]}
+    />
+  );
+};
+
+export const HydraPriceGraph = () => {
+  const theme = useTheme();
+  const { data } = useProtocolMetrics();
+
+  const runway = data && data.filter(metric => metric.runway10k > 5);
+  console.log(runway);
+
+  const [current, ...others] = bulletpoints.runway;
+  const runwayBulletpoints = [{ ...current, background: theme.palette.text.primary }, ...others];
+  const colors = runwayBulletpoints.map(b => b.background);
+
+  return (
+    <HydraChart
+      type="multi"
+      data={runway}
+      dataKey={["runwayCurrent", "runway7dot5k"]}
+      color={theme.palette.text.primary}
+      stroke={colors}
+      headerText={t`Runway Available`}
+      headerSubText={`${data && trim(data[0].runwayCurrent, 1)} Days`}
+      dataFormat="days"
+      bulletpointColors={runwayBulletpoints}
+      itemNames={tooltipItems.runway}
+      itemType={""}
+      margin={{ left: 30 }}
+      infoTooltipMessage={tooltipInfoMessages().runway}
+      expandedGraphStrokeColor={theme.palette.graphStrokeColor}
     />
   );
 };

@@ -30,6 +30,48 @@ export const MarketCap: React.FC<AbstractedMetricProps> = props => {
   return <Metric {..._props} />;
 };
 
+export const MintPrice: React.FC<AbstractedMetricProps> = props => {
+  const { data: marketCap } = useMarketCap();
+
+  const _props: MetricProps = {
+    ...props,
+    label: t`Mint Price`,
+  };
+
+  if (marketCap) _props.metric = formatCurrency(18.0, 1);
+  else _props.isLoading = true;
+
+  return <Metric {..._props} />;
+};
+
+export const FloorPrice: React.FC<AbstractedMetricProps> = props => {
+  const { data: marketCap } = useMarketCap();
+
+  const _props: MetricProps = {
+    ...props,
+    label: t`Market Price`,
+  };
+
+  if (marketCap) _props.metric = formatCurrency(22.2, 1);
+  else _props.isLoading = true;
+
+  return <Metric {..._props} />;
+};
+
+export const MarketPrice: React.FC<AbstractedMetricProps> = props => {
+  const { data: marketCap } = useMarketCap();
+
+  const _props: MetricProps = {
+    ...props,
+    label: t`Floor Price`,
+  };
+
+  if (marketCap) _props.metric = formatCurrency(15.3, 1);
+  else _props.isLoading = true;
+
+  return <Metric {..._props} />;
+};
+
 export const OHMPrice: React.FC<AbstractedMetricProps> = props => {
   const { data: ohmPrice } = useOhmPrice();
 
