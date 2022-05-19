@@ -19,10 +19,6 @@ const Stake: React.FC = () => {
     <>
       <div id="stake-view">
         <MintArea />
-
-        {/* NOTE (appleseed-olyzaps) olyzaps disabled until v2 contracts */}
-        {/* <ZapCta /> */}
-
         <MintHistory />
       </div>
       <Routes>

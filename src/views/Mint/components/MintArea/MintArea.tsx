@@ -24,11 +24,13 @@ import {
   MarketCap,
   OHMPrice,
 } from "../../../TreasuryDashboard/components/Metric/Metric";
+import MintInputArea from "./components/MintInputArea/MintInputArea";
 import RebaseTimer from "./components/RebaseTimer/RebaseTimer";
 import { StakeBalances } from "./components/StakeBalances";
 import { StakeFiveDayYield } from "./components/StakeFiveDayYield";
 import { StakeNextRebaseAmount } from "./components/StakeNextRebaseAmount";
 import { StakeRebaseYield } from "./components/StakeRebaseYield";
+
 const sharedMetricProps: PropsOf<typeof Metric> = { labelVariant: "h6", metricVariant: "h5" };
 
 export const MintArea: React.FC = () => {
@@ -59,25 +61,7 @@ export const MintArea: React.FC = () => {
           <HydraPriceGraph />
 
           {/* I'll move the following into a seperate component too */}
-          <WalletConnectedGuard message="Connect your wallet to mint HYDR">
-            <Box mt="16px">
-              <Link component={NavLink} to={`/mint/modal`}>
-                <PrimaryButton fullWidth>
-                  <Trans>Mint</Trans>
-                </PrimaryButton>
-              </Link>
-            </Box>
-
-            <StakeBalances />
-
-            <Divider color="secondary" />
-
-            <StakeNextRebaseAmount />
-
-            <StakeRebaseYield />
-
-            <StakeFiveDayYield />
-          </WalletConnectedGuard>
+          <MintInputArea />
         </Paper>
       </Zoom>
     </>
