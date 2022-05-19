@@ -1,6 +1,5 @@
 import { t, Trans } from "@lingui/macro";
 import {
-  Avatar,
   Box,
   Button,
   ButtonBase,
@@ -14,33 +13,27 @@ import {
   Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Icon, Token } from "@olympusdao/component-library";
+import { Icon } from "@olympusdao/component-library";
 import { BigNumber, ethers } from "ethers";
 import React, { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
 import { ReactComponent as DownIcon } from "src/assets/icons/arrow-down.svg";
-import { ReactComponent as ZapperIcon } from "src/assets/icons/powered-by-zapper.svg";
 import { ReactComponent as FirstStepIcon } from "src/assets/icons/step-1.svg";
 import { ReactComponent as SecondStepIcon } from "src/assets/icons/step-2.svg";
 import { ReactComponent as CompleteStepIcon } from "src/assets/icons/step-complete.svg";
 import { useApproveToken } from "src/components/TokenAllowanceGuard/hooks/useApproveToken";
-import TokenIcons from "src/components/TokenIcons";
+import TokenIcons, { AllTokenName } from "src/components/TokenIcons";
 import { ZAP_ADDRESSES } from "src/constants/addresses";
 import { trim } from "src/helpers";
-import { trackGAEvent } from "src/helpers/analytics/trackGAEvent";
 import { DecimalBigNumber } from "src/helpers/DecimalBigNumber/DecimalBigNumber";
-import { isSupportedChain } from "src/helpers/ZapHelper";
-import { useWeb3Context } from "src/hooks";
-import { useGohmBalance, useSohmBalance } from "src/hooks/useBalance";
+import { useBalances } from "src/hooks/useBalances";
+import { TokenWithBalance } from "src/hooks/useBalances";
 import { useContractAllowance } from "src/hooks/useContractAllowance";
-import { useGohmPrice, useOhmPrice } from "src/hooks/usePrices";
 import { useTestableNetworks } from "src/hooks/useTestableNetworks";
 import { useZapExecute } from "src/hooks/useZapExecute";
-import { useZapTokenBalances, ZapperToken } from "src/hooks/useZapTokenBalances";
-import { error } from "src/slices/MessagesSlice";
 
 import SelectTokenModal from "./SelectTokenModal";
 import SlippageModal from "./SlippageModal";
+
 const iconStyle = { height: "24px", width: "24px", zIndex: 1 };
 const viewBox = "-8 -12 48 48";
 const buttonIconStyle = { height: "16px", width: "16px", marginInline: "6px" };
@@ -59,79 +52,35 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-type ZapQuantity = string | number | null;
+type QuoteQuantity = string | number | null;
 
-// tokensBalance = {
-//   eth: {
-//     "type": "base",
-//     "network": "ethereum",
-//     "address": "0x0000000000000000000000000000000000000000",
-//     "decimals": 18,
-//     "symbol": "ETH",
-//     "price": 2028.45,
-//     "balance": 0.3122978675504286,
-//     "balanceRaw": "0.312297867550428636",
-//     "balanceUSD": 633.4806094326669,
-//     "tokenImageUrl": "https://storage.googleapis.com/zapper-fi-assets/tokens/ethereum/0x0000000000000000000000000000000000000000.png"
-//   },
-//   usdc: {
-//     "type": "base",
-//     "network": "ethereum",
-//     "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-//     "decimals": 6,
-//     "symbol": "USDC",
-//     "price": 0.999578,
-//     "balance": 18811.560084,
-//     "balanceRaw": "18811.560084",
-//     "balanceUSD": 18803.621605644552,
-//     "tokenImageUrl": "https://storage.googleapis.com/zapper-fi-assets/tokens/ethereum/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
-//   }
-// }
-
-const ZapStakeAction: React.FC = () => {
-  const { address, networkId } = useWeb3Context();
-
-  const dispatch = useDispatch();
+const MintAction: React.FC = () => {
   const classes = useStyles();
 
-  const zapTokenBalances = useZapTokenBalances();
-  const tokensBalance = zapTokenBalances.data?.balances;
+  // TODO: change to mint function
   const zapExecute = useZapExecute();
 
-  const [outputGOHM, setOutputGOHM] = useState<boolean | null>(null);
-
-  const [zapToken, setZapToken] = useState<string | null>(null);
-  const handleSelectZapToken = (token: string) => {
-    const uaData = {
-      type: "OlyZaps Token Select",
-      token: token,
-      address: address,
-    };
-    trackGAEvent({
-      category: "OlyZaps",
-      action: uaData.type,
-      label: uaData.token ?? "unknown",
-    });
-    setZapToken(token);
+  const [quoteToken, setQuoteToken] = useState<string | null>(null);
+  const handleSelectQuoteToken = (token: string) => {
+    setQuoteToken(token);
     handleClose();
   };
 
-  const selectedTokenBalance: ZapperToken | null = useMemo(() => {
-    if (!tokensBalance || !zapToken || !tokensBalance[zapToken]) return null;
+  const networks = useTestableNetworks();
 
-    return tokensBalance[zapToken];
-  }, [tokensBalance, zapToken]);
+  const quoteTokens = useBalances(["DAI", "USDC"], networks.MAINNET);
+
+  const selectedToken: TokenWithBalance | undefined = useMemo(() => {
+    if (!quoteToken || !quoteTokens[quoteToken]) return undefined;
+
+    return quoteTokens[quoteToken];
+  }, [quoteTokens, quoteToken]);
 
   useEffect(() => {
-    if (!selectedTokenBalance) {
-      setZapToken(null);
+    if (!selectedToken) {
+      setQuoteToken(null);
     }
-  }, [selectedTokenBalance]);
-
-  useEffect(() => {
-    if (!isSupportedChain(networkId))
-      dispatch(error(t`Zaps are only available on Ethereum Mainnet. Please switch networks.`));
-  }, [dispatch, networkId]);
+  }, [selectedToken]);
 
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const handleOpen = () => {
@@ -146,90 +95,51 @@ const ZapStakeAction: React.FC = () => {
   const [inputQuantity, setInputQuantity] = useState("");
   const [outputQuantity, setOutputQuantity] = useState("");
 
-  const olyZapsSwapOfferDisplay = (outputQuantity: Partial<string | number>) => {
-    const uaData = {
-      type: "OlyZaps Offer Display",
-      token: zapToken,
-      minOutput: outputQuantity,
-    };
-    trackGAEvent({
-      category: "OlyZaps",
-      action: uaData.type ?? "unknown",
-      label: zapToken ?? "unknown",
-    });
+  // const hydrMintPrice = useHydrPrice();
+  // const hydrBalance = useHydrBalance();
+  const hydrMintPrice = {
+    data: 1,
   };
+  const hydrBalance = new DecimalBigNumber("0");
 
-  const ohmMarketPrice = useOhmPrice();
-  const gOhmMarketPrice = useGohmPrice();
+  useEffect(() => setQuoteTokenQuantity(inputQuantity), [inputQuantity]);
 
-  const networks = useTestableNetworks();
-  const sOhmBalance = useSohmBalance()[networks.MAINNET].data;
-  const gOhmBalance = useGohmBalance()[networks.MAINNET].data;
-
-  // TODO use DecimalBigNumber
-  const exchangeRate: number | null = useMemo(() => {
-    if (outputGOHM != null && selectedTokenBalance && ohmMarketPrice.data && gOhmMarketPrice.data) {
-      return (
-        (outputGOHM === undefined || outputGOHM === null || outputGOHM ? gOhmMarketPrice.data : ohmMarketPrice.data) /
-        selectedTokenBalance.price
-      );
-    } else {
-      return null;
-    }
-  }, [outputGOHM, ohmMarketPrice, gOhmMarketPrice, selectedTokenBalance]);
-
-  useEffect(() => setZapTokenQuantity(inputQuantity), [exchangeRate, inputQuantity]);
-
-  const setZapTokenQuantity = (q: ZapQuantity) => {
+  const setQuoteTokenQuantity = (q: QuoteQuantity) => {
     if (q == null || q === "") {
       setInputQuantity("");
       setOutputQuantity("");
       return;
     }
     setInputQuantity(q.toString());
-    setOutputQuantity(exchangeRate ? (+q / exchangeRate).toString() : "");
-    if (outputQuantity) {
-      olyZapsSwapOfferDisplay(outputQuantity);
-    }
+    setOutputQuantity(hydrMintPrice.data ? (+q / hydrMintPrice.data).toString() : "");
   };
 
-  const setOutputTokenQuantity = (q: ZapQuantity) => {
+  const setOutputTokenQuantity = (q: QuoteQuantity) => {
     if (q == null || q === "") {
       setInputQuantity("");
       setOutputQuantity("");
       return;
     }
     setOutputQuantity(q.toString());
-    setInputQuantity(exchangeRate ? (+q * exchangeRate).toString() : "");
+    setInputQuantity(hydrMintPrice.data ? (+q * hydrMintPrice.data).toString() : "");
   };
 
-  useEffect(() => setZapTokenQuantity(null), [zapToken]);
+  useEffect(() => setQuoteTokenQuantity(null), [quoteToken]);
 
-  const zapTokenIsEth = useMemo(() => {
-    return selectedTokenBalance && selectedTokenBalance.address === ethers.constants.AddressZero;
-  }, [selectedTokenBalance]);
-
-  // If ETH is selected, don't pass it through (since we don't request a token allowance)
-  // And if zapToken is not yet set, don't pass it through either
-  // useContractAllowance will return null if no token is given
   const { data: tokenAllowance } = useContractAllowance(
-    selectedTokenBalance && !zapTokenIsEth ? { [networkId]: selectedTokenBalance.address } : {},
-    ZAP_ADDRESSES,
+    selectedToken ? selectedToken.addresses : {},
+    ZAP_ADDRESSES, // TODO: change it to mint contract address
   );
 
   /**
-   * Indicates whether there is currently a token allowed for the selected token, `zapToken`
+   * Indicates whether there is currently a token allowed for the selected token, `quoteToken`
    */
   const hasTokenAllowance = useMemo(() => {
-    if (zapTokenIsEth) return ethers.constants.MaxUint256;
+    return tokenAllowance && tokenAllowance.gt(BigNumber.from(Math.floor(Number(inputQuantity)) || "0"));
+  }, [tokenAllowance, inputQuantity]);
 
-    return tokenAllowance && tokenAllowance.gt(BigNumber.from(0));
-  }, [tokenAllowance, zapTokenIsEth]);
-
-  const approveMutation = useApproveToken(
-    selectedTokenBalance ? { [networkId]: selectedTokenBalance.address } : {},
-    ZAP_ADDRESSES,
-  );
+  // TODO: change it to mint contract address
+  const approveMutation = useApproveToken(selectedToken ? selectedToken.addresses : {}, ZAP_ADDRESSES);
 
   const onSeekApproval = async () => {
     approveMutation.mutate();
@@ -241,26 +151,33 @@ const ZapStakeAction: React.FC = () => {
 
   // Number(outputQuantity) * (1 - +customSlippage / 100)
   const minimumAmount: DecimalBigNumber = useMemo(() => {
-    if (!outputQuantity || exchangeRate == Number.MAX_VALUE) return new DecimalBigNumber("0");
+    if (!outputQuantity) return new DecimalBigNumber("0");
 
     return new DecimalBigNumber(outputQuantity).mul(new DecimalBigNumber((1 - +customSlippage / 100).toString(), 9));
-  }, [customSlippage, exchangeRate, outputQuantity]);
+  }, [customSlippage, outputQuantity]);
 
   const minimumAmountString: string = useMemo(() => {
     return minimumAmount.toString({ decimals: 4, trim: true });
   }, [minimumAmount]);
 
   const onZap = async () => {
-    if (outputGOHM != null && selectedTokenBalance) {
+    if (selectedToken) {
       zapExecute.mutate({
         slippage: customSlippage,
-        sellAmount: ethers.utils.parseUnits(inputQuantity, selectedTokenBalance.decimals),
-        tokenAddress: selectedTokenBalance.address,
+        sellAmount: ethers.utils.parseUnits(inputQuantity, selectedToken.decimals),
+        tokenAddress: "",
         minimumAmount: minimumAmountString,
-        gOHM: outputGOHM,
+        gOHM: false,
       });
     }
   };
+
+  let avgMintPrice = 0;
+  if (inputQuantity && outputQuantity) {
+    avgMintPrice = Number(inputQuantity) / Number(outputQuantity);
+  } else {
+    avgMintPrice = hydrMintPrice.data;
+  }
 
   return (
     <>
@@ -269,16 +186,16 @@ const ZapStakeAction: React.FC = () => {
       </Typography>
       <FormControl className="zap-input" variant="outlined" color="primary">
         <InputLabel htmlFor="amount-input"></InputLabel>
-        {zapToken != null ? (
+        {selectedToken ? (
           <OutlinedInput
             id="zap-amount-input"
             inputProps={{ "data-testid": "zap-amount-input" }}
             type="number"
             placeholder="Enter Amount"
             className="zap-input"
-            disabled={zapToken == null}
+            disabled={quoteToken == null}
             value={inputQuantity}
-            onChange={e => setZapTokenQuantity(e.target.value)}
+            onChange={e => setQuoteTokenQuantity(e.target.value)}
             endAdornment={
               <InputAdornment position="end">
                 <div
@@ -292,12 +209,9 @@ const ZapStakeAction: React.FC = () => {
                   <Box flexDirection="column" display="flex">
                     <Box flexDirection="row" display="flex" alignItems="center" justifyContent="flex-end">
                       <ButtonBase onClick={handleOpen}>
-                        <Avatar
-                          src={selectedTokenBalance ? selectedTokenBalance.tokenImageUrl : ""}
-                          style={{ height: "30px", width: "30px" }}
-                        />
+                        <TokenIcons name={selectedToken.name as AllTokenName} />
                         <Box width="10px" />
-                        <Typography>{selectedTokenBalance && selectedTokenBalance.symbol}</Typography>
+                        <Typography>{selectedToken && selectedToken.name}</Typography>
                         {downIcon}
                       </ButtonBase>
                     </Box>
@@ -305,13 +219,17 @@ const ZapStakeAction: React.FC = () => {
                     <Box height="5px" />
                     <Box flexDirection="row" display="flex" alignItems="center">
                       <Typography color="textSecondary">{`Balance ${trim(
-                        selectedTokenBalance ? selectedTokenBalance.balance : 0,
+                        selectedToken && selectedToken.balance.data ? selectedToken.balance.data.toApproxNumber() : 0,
                         2,
                       )}`}</Typography>
                       <Box width="10px" />
                       <ButtonBase
                         onClick={() =>
-                          setZapTokenQuantity(selectedTokenBalance ? selectedTokenBalance.balanceRaw : null)
+                          setQuoteTokenQuantity(
+                            selectedToken && selectedToken.balance.data
+                              ? selectedToken.balance.data.toApproxNumber()
+                              : null,
+                          )
                         }
                       >
                         <Typography>
@@ -354,7 +272,7 @@ const ZapStakeAction: React.FC = () => {
           className="zap-input"
           inputProps={{ "data-testid": "zap-amount-output" }}
           value={outputQuantity}
-          disabled={zapToken == null}
+          disabled={quoteToken == null}
           onChange={e => setOutputTokenQuantity(e.target.value)}
           labelWidth={0}
           endAdornment={
@@ -376,7 +294,7 @@ const ZapStakeAction: React.FC = () => {
                     </ButtonBase>
                   </Box>
                   <Box flexDirection="row" display="flex" alignItems="center">
-                    <Typography color="textSecondary">{`Balance ${formatBalance(gOhmBalance)}`}</Typography>
+                    <Typography color="textSecondary">{`Balance ${formatBalance(hydrBalance)}`}</Typography>
                   </Box>
                 </Box>
               </div>
@@ -405,14 +323,13 @@ const ZapStakeAction: React.FC = () => {
       </Box>
       <Box justifyContent="space-between" flexDirection="row" display="flex" width="100%" marginY="8px">
         <Typography>
-          <Trans>Exchange Rate</Trans>
+          <Trans>Avg. Mint Price</Trans>
         </Typography>
-        <Typography>
-          {outputGOHM == null || !selectedTokenBalance
-            ? "nil"
-            : `${trim(exchangeRate || 0, 4)} ${selectedTokenBalance.symbol}`}{" "}
-          = 1 {outputGOHM ? "gOHM" : "sOHM"}
-        </Typography>
+        {selectedToken ? (
+          <Typography>{avgMintPrice ? `${avgMintPrice} ${selectedToken.name} = 1 HYDR` : `UNKOWN`}</Typography>
+        ) : (
+          <Typography></Typography>
+        )}
       </Box>
       <Box
         justifyContent="space-between"
@@ -425,9 +342,7 @@ const ZapStakeAction: React.FC = () => {
         <Typography>
           <Trans>Minimum You Get</Trans>
         </Typography>
-        <Typography>
-          {minimumAmountString} {outputGOHM ? "gOHM" : "sOHM"}
-        </Typography>
+        <Typography>{`${minimumAmountString} HYDR`}</Typography>
       </Box>
       {hasTokenAllowance ? (
         <Button
@@ -436,8 +351,7 @@ const ZapStakeAction: React.FC = () => {
           variant="contained"
           color="primary"
           disabled={
-            zapToken == null ||
-            outputGOHM == null ||
+            quoteToken == null ||
             zapExecute.isLoading ||
             outputQuantity === "" ||
             // We cannot pass a minimum amount of 0 to the mutation, so catch it here
@@ -461,9 +375,7 @@ const ZapStakeAction: React.FC = () => {
               className="zap-stake-button"
               variant="contained"
               color="primary"
-              disabled={
-                zapToken == null || outputGOHM == null || zapTokenBalances.isLoading || approveMutation.isLoading
-              }
+              disabled={!selectedToken || selectedToken.balance.isLoading || approveMutation.isLoading}
               onClick={onSeekApproval}
               classes={approveMutation.isSuccess ? { disabled: classes.ApprovedButton } : {}}
             >
@@ -505,12 +417,12 @@ const ZapStakeAction: React.FC = () => {
         </Grid>
       )}
 
-      {SelectTokenModal(handleClose, modalOpen, zapTokenBalances.isLoading, handleSelectZapToken, {
-        regularTokens: tokensBalance,
+      {SelectTokenModal(handleClose, modalOpen, handleSelectQuoteToken, {
+        regularTokens: quoteTokens || {},
       })}
       {SlippageModal(handleSlippageModalClose, slippageModalOpen, customSlippage, setCustomSlippage)}
     </>
   );
 };
 
-export default ZapStakeAction;
+export default MintAction;

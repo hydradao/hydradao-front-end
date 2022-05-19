@@ -59,7 +59,11 @@ export class Contract<TFactory extends Factory = Factory, TAddressMap extends Ad
    *
    * @param networkId The network you want the contract on
    */
-  getEthersContract = (networkId: keyof TAddressMap) => {
+  getEthersContract = (networkId: NetworkId) => {
+    if (!this.inNetwork(networkId)) {
+      throw `No ${this.name} contract in network ${networkId}.`;
+    }
+
     if (!this._contractCache[networkId]) {
       const address = this.getAddress(networkId);
       const provider = Providers.getStaticProvider(networkId as NetworkId);
@@ -68,5 +72,10 @@ export class Contract<TFactory extends Factory = Factory, TAddressMap extends Ad
     }
 
     return this._contractCache[networkId];
+  };
+
+  inNetwork = (networkId: NetworkId) => {
+    const networkIds = Object.keys(this.addresses).map(Number);
+    return networkIds.includes(networkId);
   };
 }

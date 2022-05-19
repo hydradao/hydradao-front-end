@@ -1,6 +1,5 @@
-import { t, Trans } from "@lingui/macro";
+import { t } from "@lingui/macro";
 import {
-  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -14,20 +13,17 @@ import {
   SvgIcon,
   Typography,
 } from "@material-ui/core";
-import { Token } from "@olympusdao/component-library";
 import { ReactComponent as XIcon } from "src/assets/icons/x.svg";
+import TokenIcons, { AllTokenName } from "src/components/TokenIcons";
 import { trim } from "src/helpers";
-import { ZapperToken } from "src/hooks/useZapTokenBalances";
+import { TokenWithBalance } from "src/hooks/useBalances";
 
 function SelectTokenModal(
   handleClose: () => void,
   modalOpen: boolean,
-  isTokensLoading: boolean,
-
   handleSelectToken: { (token: string): void },
   tokens: {
-    regularTokens?: { [key: string]: ZapperToken };
-    output?: boolean;
+    regularTokens: { [key: string]: TokenWithBalance };
   },
 ) {
   return (
@@ -54,60 +50,40 @@ function SelectTokenModal(
         </Box>
       </DialogTitle>
       <Box paddingX="36px" paddingBottom="16px" paddingTop="12px">
-        {isTokensLoading ? (
-          <Box display="flex" justifyItems="center" flexDirection="column" alignItems="center">
-            <CircularProgress />
-            <Box height={24} />
-            <Typography>
-              <Trans>Dialing Zapper...</Trans>
-            </Typography>
-          </Box>
-        ) : Object.entries(tokens).length == 0 ? (
-          <Box display="flex" justifyContent="center">
-            <Typography>
-              <Trans>Ser, you have no assets...</Trans>
-            </Typography>
-          </Box>
-        ) : (
+        {
           <Paper style={{ maxHeight: 300, overflow: "auto", borderRadius: 10 }}>
             <List>
-              {tokens.regularTokens &&
-                Object.entries(tokens.regularTokens)
-                  .filter(token => !token[1].hide)
-                  .sort((tokenA, tokenB) => tokenB[1].balanceUSD - tokenA[1].balanceUSD)
-                  .map(token => (
-                    <ListItem button onClick={() => handleSelectToken(token[0])} key={token[1].symbol}>
-                      <ListItemAvatar>
-                        <Avatar src={token[1].tokenImageUrl} />
-                      </ListItemAvatar>
-                      <ListItemText primary={token[1].symbol} />
-                      <Box flexGrow={10} />
+              {Object.values(tokens.regularTokens)
+                .sort((tokenA, tokenB) => {
+                  if (tokenB.balance.data && tokenA.balance.data) {
+                    return tokenB.balance.data.sub(tokenA.balance.data).toApproxNumber();
+                  } else {
+                    return 0;
+                  }
+                })
+                .map(token => (
+                  <ListItem button onClick={() => handleSelectToken(token.name)} key={token.name}>
+                    <ListItemAvatar>
+                      <TokenIcons name={token.name as AllTokenName} />
+                    </ListItemAvatar>
+                    <ListItemText primary={token.name} />
+                    <Box flexGrow={10} />
+                    {token.balance.data ? (
                       <ListItemText
                         style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}
-                        primary={`$${trim(token[1].balanceUSD, 2)}`}
-                        secondary={trim(token[1].balance, 4)}
+                        primary={`$` + trim(token.balance.data.toApproxNumber(), 2)}
+                        secondary={trim(token.balance.data.toApproxNumber(), 4)}
                       />
-                    </ListItem>
-                  ))}
-              {tokens.output && (
-                <>
-                  <ListItem button onClick={() => handleSelectToken("sOHM")} key={"sOHM"}>
-                    <ListItemAvatar>
-                      <Token name={"sOHM"} />
-                    </ListItemAvatar>
-                    <ListItemText primary={"sOHM"} />
+                    ) : (
+                      <ListItemAvatar>
+                        <CircularProgress />
+                      </ListItemAvatar>
+                    )}
                   </ListItem>
-                  <ListItem button onClick={() => handleSelectToken("gOHM")} key={"gOHM"}>
-                    <ListItemAvatar>
-                      <Token name={"wsOHM"} />
-                    </ListItemAvatar>
-                    <ListItemText primary={"gOHM"} />
-                  </ListItem>
-                </>
-              )}
+                ))}
             </List>
           </Paper>
-        )}
+        }
       </Box>
     </Dialog>
   );

@@ -7,7 +7,7 @@ import React, { useMemo } from "react";
 import ConnectButton from "src/components/ConnectButton/ConnectButton";
 import { useWeb3Context } from "src/hooks/web3Context";
 
-import ZapStakeAction from "./ZapStakeAction";
+import MintAction from "./MintAction";
 
 const MintInputArea: React.FC = () => {
   const { address } = useWeb3Context();
@@ -25,7 +25,7 @@ const MintInputArea: React.FC = () => {
         </div>
       ) : (
         <Box className="stake-action-area">
-          <ZapStakeAction />
+          <MintAction />
         </Box>
       )}
     </Box>
