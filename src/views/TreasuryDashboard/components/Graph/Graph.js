@@ -131,7 +131,6 @@ export const HydraPriceGraph = () => {
   const { data } = useProtocolMetrics();
 
   const runway = data && data.filter(metric => metric.runway10k > 5);
-  console.log(runway);
 
   const [current, ...others] = bulletpoints.runway;
   const runwayBulletpoints = [{ ...current, background: theme.palette.text.primary }, ...others];

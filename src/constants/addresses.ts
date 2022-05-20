@@ -2,6 +2,12 @@ import { NetworkId } from "src/constants";
 
 export type AddressMap = Partial<Record<NetworkId, string>>;
 
+// TODO: add similar uniswap pair contract for Hydra here.
+// Or query the getPair function from the factory contract 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f
+export const WETH_USDT_LP_ADDRESSES = {
+  [NetworkId.MAINNET]: "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
+};
+
 export const STAKING_ADDRESSES = {
   [NetworkId.TESTNET_RINKEBY]: "0x06984c3a9eb8e3a8df02a4c09770d5886185792d",
   // [NetworkId.TESTNET_RINKEBY]: "0x6d1ca8B011058C322fE859AE3Ee6e6d647a22698",

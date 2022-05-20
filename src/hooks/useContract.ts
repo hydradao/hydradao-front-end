@@ -33,6 +33,7 @@ import { abi as PAIR_CONTRACT_ABI } from "src/abi/PairContract.json";
 import { abi as SOHM_ABI } from "src/abi/sOhmv2.json";
 import { abi as SUSHI_CHEF_ABI } from "src/abi/SushiChef.json";
 import { abi as SUSHI_REWARDER_ABI } from "src/abi/SushiRewarder.json";
+import { abi as UNISWAP_V2_LP_ABI } from "src/abi/UniswapV2Lp.json";
 import { abi as ZIP_REWARDER_ABI } from "src/abi/ZipRewarder.json";
 import { abi as ZIP_SECONDARY_REWARDER_ABI } from "src/abi/ZipSecondaryRewarder.json";
 import { AddressMap } from "src/constants/addresses";
@@ -52,6 +53,7 @@ import {
   OlympusStakingv2,
   PairContract,
   SOhmv2,
+  UniswapV2Lp,
 } from "src/typechain";
 import { BalancerV2Pool } from "src/typechain/BalancerV2Pool";
 import { BalancerVault } from "src/typechain/BalancerVault";
@@ -125,6 +127,7 @@ export const createMultipleStaticContracts = <TContract extends Contract = Contr
 };
 
 // Static contracts
+export const useStaticHydraContract = createStaticContract<UniswapV2Lp>(UNISWAP_V2_LP_ABI);
 export const useStaticSohmContract = createStaticContract<SOhmv2>(SOHM_ABI);
 export const useStaticTokenContract = createStaticContract<IERC20>(IERC20_ABI);
 export const useStaticFuseContract = createStaticContract<FuseProxy>(FUSE_PROXY_ABI);

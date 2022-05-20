@@ -2,7 +2,7 @@ import { t } from "@lingui/macro";
 import { Metric } from "@olympusdao/component-library";
 import { formatCurrency, formatNumber } from "src/helpers";
 import { useCurrentIndex } from "src/hooks/useCurrentIndex";
-import { useGohmPrice, useOhmPrice } from "src/hooks/usePrices";
+import { useGohmPrice, useHYDRMarketPrice, useOhmPrice } from "src/hooks/usePrices";
 import {
   useMarketCap,
   useOhmCirculatingSupply,
@@ -31,14 +31,14 @@ export const MarketCap: React.FC<AbstractedMetricProps> = props => {
 };
 
 export const MintPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: marketCap } = useMarketCap();
+  const { data: mintPrice } = useOhmPrice();
 
   const _props: MetricProps = {
     ...props,
     label: t`Mint Price`,
   };
 
-  if (marketCap) _props.metric = formatCurrency(18.0, 1);
+  if (mintPrice) _props.metric = formatCurrency(mintPrice, 2);
   else _props.isLoading = true;
 
   return <Metric {..._props} />;
@@ -49,7 +49,7 @@ export const FloorPrice: React.FC<AbstractedMetricProps> = props => {
 
   const _props: MetricProps = {
     ...props,
-    label: t`Market Price`,
+    label: t`Floor Price`,
   };
 
   if (marketCap) _props.metric = formatCurrency(22.2, 1);
@@ -59,14 +59,13 @@ export const FloorPrice: React.FC<AbstractedMetricProps> = props => {
 };
 
 export const MarketPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: marketCap } = useMarketCap();
-
+  const { data: hydraPrice, error: e } = useHYDRMarketPrice();
   const _props: MetricProps = {
     ...props,
-    label: t`Floor Price`,
+    label: t`Market Price`,
   };
 
-  if (marketCap) _props.metric = formatCurrency(15.3, 1);
+  if (hydraPrice) _props.metric = formatCurrency(hydraPrice, 2);
   else _props.isLoading = true;
 
   return <Metric {..._props} />;

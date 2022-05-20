@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { NetworkId } from "src/constants";
+import { WETH_USDT_LP_ADDRESSES } from "src/constants/addresses";
 import { OHM_DAI_RESERVE_CONTRACT_DECIMALS } from "src/constants/decimals";
 import { parseBigNumber } from "src/helpers";
 import { ohm_dai } from "src/helpers/AllBonds";
@@ -8,10 +9,26 @@ import { queryAssertion } from "src/helpers/react-query/queryAssertion";
 import { assert } from "src/helpers/types/assert";
 import { nonNullable } from "src/helpers/types/nonNullable";
 
-import { useStaticPairContract } from "./useContract";
+import { useStaticHydraContract, useStaticPairContract } from "./useContract";
 import { useCurrentIndex } from "./useCurrentIndex";
 
 export const ohmPriceQueryKey = () => ["useOhmPrice"];
+export const hydraPriceQueryKey = () => ["useHYDRMarketPrice"];
+
+// TODO: right now it is wETH market price from uniswap.
+export const useHYDRMarketPrice = () => {
+  const address = WETH_USDT_LP_ADDRESSES[NetworkId.MAINNET];
+  assert(address, "Contract should exist for NetworkId.MAINNET");
+
+  const reserveContract = useStaticHydraContract(address, NetworkId.MAINNET);
+
+  const key = hydraPriceQueryKey();
+  return useQuery<number, Error>(key, async () => {
+    const [weth, usdt] = await reserveContract.getReserves();
+    // TODO: we could do better on getting decimals of those tokens.
+    return parseBigNumber(usdt, 6) / parseBigNumber(weth, 18);
+  });
+};
 
 /**
  * Returns the market price of OHM.
@@ -25,7 +42,6 @@ export const useOhmPrice = () => {
   const key = ohmPriceQueryKey();
   return useQuery<number, Error>(key, async () => {
     const [ohm, dai] = await reserveContract.getReserves();
-
     return parseBigNumber(dai.div(ohm), OHM_DAI_RESERVE_CONTRACT_DECIMALS);
   });
 };
