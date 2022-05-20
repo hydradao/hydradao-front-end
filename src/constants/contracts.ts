@@ -8,6 +8,7 @@ import {
   OlympusProV2__factory,
   OlympusStakingv2__factory,
   PrizePool__factory,
+  UniswapV2Lp__factory,
   Zap__factory,
 } from "src/typechain";
 
@@ -22,8 +23,15 @@ import {
   OP_BOND_DEPOSITORY_ADDRESSES,
   PT_PRIZE_POOL_ADDRESSES,
   STAKING_ADDRESSES,
+  WETH_USDT_LP_ADDRESSES,
   ZAP_ADDRESSES,
 } from "./addresses";
+
+export const WETH_USDT_LP_CONTRACT = new Contract({
+  factory: UniswapV2Lp__factory,
+  name: "WETH USDT Contract",
+  addresses: WETH_USDT_LP_ADDRESSES,
+});
 
 export const BOND_DEPOSITORY_CONTRACT = new Contract({
   factory: BondDepository__factory,

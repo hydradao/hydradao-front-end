@@ -1,12 +1,24 @@
+import { formatUnits } from "@ethersproject/units";
 import { t, Trans } from "@lingui/macro";
 import { Box, makeStyles, Table, TableCell, TableHead, TableRow, Typography, Zoom } from "@material-ui/core";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { Skeleton } from "@material-ui/lab";
 import { DataRow, OHMTokenProps, Paper, SecondaryButton, Token, TokenStack } from "@olympusdao/component-library";
+import { BigNumber } from "ethers";
+import { useState } from "react";
+import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { formatCurrency, formatNumber } from "src/helpers";
 import { useWeb3Context } from "src/hooks/web3Context";
 import { ExternalPool } from "src/lib/ExternalPool";
 import { NetworkId } from "src/networkDetails";
+
+interface Record {
+  sender: string;
+  in0: string;
+  in1: string;
+  out0: string;
+  out1: string;
+}
 
 const useStyles = makeStyles(theme => ({
   stakePoolsWrapper: {
@@ -91,13 +103,36 @@ const data = [
   },
 ];
 
-const AllMints = (props: { isSmallScreen: boolean }) => (
-  <>
-    {data.map(row => (
-      <Row {...row} />
-    ))}
-  </>
-);
+const AllMints = (props: { isSmallScreen: boolean }) => {
+  const [records, setRecords] = useState<Array<Record>>([]);
+
+  const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
+
+  reserveContract.on("Swap", (sender: string, in0: number, in1: number, out0: number, out1: number, to: string) => {
+    const record: Record = {
+      sender: sender,
+      in0: in0 + "",
+      in1: in1 + "",
+      out0: out0 + "",
+      out1: out1 + "",
+    };
+    setRecords(records.concat(record));
+  });
+
+  return (
+    <>
+      {records.map(row => (
+        <Row
+          time="fake time"
+          inputValue={row.in0}
+          outputValue={row.out0}
+          avgPrice="fakePrice"
+          walletAddress={row.sender}
+        />
+      ))}
+    </>
+  );
+};
 
 const Row: React.FC<{
   time: string;

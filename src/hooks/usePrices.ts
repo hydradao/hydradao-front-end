@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import { NetworkId } from "src/constants";
-import { WETH_USDT_LP_ADDRESSES } from "src/constants/addresses";
+import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { OHM_DAI_RESERVE_CONTRACT_DECIMALS } from "src/constants/decimals";
 import { parseBigNumber } from "src/helpers";
 import { ohm_dai } from "src/helpers/AllBonds";
@@ -9,7 +9,7 @@ import { queryAssertion } from "src/helpers/react-query/queryAssertion";
 import { assert } from "src/helpers/types/assert";
 import { nonNullable } from "src/helpers/types/nonNullable";
 
-import { useStaticHydraContract, useStaticPairContract } from "./useContract";
+import { useStaticPairContract } from "./useContract";
 import { useCurrentIndex } from "./useCurrentIndex";
 
 export const ohmPriceQueryKey = () => ["useOhmPrice"];
@@ -17,10 +17,7 @@ export const hydraPriceQueryKey = () => ["useHYDRMarketPrice"];
 
 // TODO: right now it is wETH market price from uniswap.
 export const useHYDRMarketPrice = () => {
-  const address = WETH_USDT_LP_ADDRESSES[NetworkId.MAINNET];
-  assert(address, "Contract should exist for NetworkId.MAINNET");
-
-  const reserveContract = useStaticHydraContract(address, NetworkId.MAINNET);
+  const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
 
   const key = hydraPriceQueryKey();
   return useQuery<number, Error>(key, async () => {

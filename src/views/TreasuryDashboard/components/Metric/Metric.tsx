@@ -1,6 +1,10 @@
 import { t } from "@lingui/macro";
 import { Metric } from "@olympusdao/component-library";
+import { useCallback, useEffect, useState } from "react";
+import { NetworkId } from "src/constants";
+import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { formatCurrency, formatNumber } from "src/helpers";
+import { parseBigNumber } from "src/helpers";
 import { useCurrentIndex } from "src/hooks/useCurrentIndex";
 import { useGohmPrice, useHYDRMarketPrice, useOhmPrice } from "src/hooks/usePrices";
 import {
@@ -59,14 +63,28 @@ export const FloorPrice: React.FC<AbstractedMetricProps> = props => {
 };
 
 export const MarketPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: hydraPrice, error: e } = useHYDRMarketPrice();
+  const { data: hydraPrice } = useHYDRMarketPrice();
+  const [latestHydraPrice, setLatestHydraPrice] = useState(hydraPrice);
+
+  const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
+
+  reserveContract.on("Sync", (reserve0, reserve1) => {
+    // TODO: need refactor!
+    setLatestHydraPrice(parseBigNumber(reserve1, 6) / parseBigNumber(reserve0, 18));
+  });
+
   const _props: MetricProps = {
     ...props,
     label: t`Market Price`,
   };
 
-  if (hydraPrice) _props.metric = formatCurrency(hydraPrice, 2);
-  else _props.isLoading = true;
+  if (latestHydraPrice) {
+    _props.metric = formatCurrency(latestHydraPrice, 2);
+  } else if (hydraPrice) {
+    _props.metric = formatCurrency(hydraPrice, 2);
+  } else {
+    _props.isLoading = true;
+  }
 
   return <Metric {..._props} />;
 };
