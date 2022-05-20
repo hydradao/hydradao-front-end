@@ -25,7 +25,7 @@ import {
   OHMPrice,
 } from "../../../TreasuryDashboard/components/Metric/Metric";
 import MintInputArea from "./components/MintInputArea/MintInputArea";
-import RebaseTimer from "./components/RebaseTimer/RebaseTimer";
+import RewardTimer from "./components/RewardTimer/RewardTimer";
 import { StakeBalances } from "./components/StakeBalances";
 import { StakeFiveDayYield } from "./components/StakeFiveDayYield";
 import { StakeNextRebaseAmount } from "./components/StakeNextRebaseAmount";
@@ -39,11 +39,11 @@ export const MintArea: React.FC = () => {
   return (
     <>
       <Zoom in onEntered={() => setIsZoomed(true)}>
-        <Paper headerText={t`Mint HYDR`} subHeader={<RebaseTimer />}>
+        <Paper headerText={t`Mint HYDR`}>
           <Box mb="28px">
             <Grid>
               <MetricCollection>
-                <CountDown className="stake-tvl" />
+                <RewardTimer className="stake-tvl" />
               </MetricCollection>
             </Grid>
           </Box>
