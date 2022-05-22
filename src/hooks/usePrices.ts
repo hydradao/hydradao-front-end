@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import { NetworkId } from "src/constants";
-import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
+import { HYDRA_MINTING, HYDRA_TREASURY, WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { OHM_DAI_RESERVE_CONTRACT_DECIMALS } from "src/constants/decimals";
 import { parseBigNumber } from "src/helpers";
 import { ohm_dai } from "src/helpers/AllBonds";
@@ -9,6 +9,8 @@ import { Providers } from "src/helpers/providers/Providers/Providers";
 import { queryAssertion } from "src/helpers/react-query/queryAssertion";
 import { assert } from "src/helpers/types/assert";
 import { nonNullable } from "src/helpers/types/nonNullable";
+import { useWeb3Context } from "src/hooks";
+import { MintFromTreasuryEvent } from "src/typechain/Minting";
 import { SwapEvent } from "src/typechain/UniswapV2Lp";
 import { FloorPrice } from "src/views/TreasuryDashboard/components/Metric/Metric";
 
@@ -18,6 +20,7 @@ import { useCurrentIndex } from "./useCurrentIndex";
 export const ohmPriceQueryKey = () => ["useOhmPrice"];
 export const hydraPriceQueryKey = () => ["useHYDRMarketPrice"];
 export const hydraSwapEventsQueryKey = () => ["useHYDRSwapEvents"];
+export const hydrMintEventsQueryKey = (networkId: number) => ["useHYDRSwapEvents", networkId];
 
 interface PricePoint {
   timestamp: number;
@@ -26,8 +29,30 @@ interface PricePoint {
   marketPrice: number;
 }
 
+export const useHydrMintPrice = () => {
+  const { networkId } = useWeb3Context();
+
+  const minting = HYDRA_MINTING.getEthersContract(networkId);
+
+  return useQuery<number, Error>(["useHydrMintPrice", networkId], async () => {
+    const mintPrice = await minting.mintPrice();
+    return parseBigNumber(mintPrice, 9);
+  });
+};
+
+export const useHydrFloorPrice = () => {
+  const { networkId } = useWeb3Context();
+
+  const treasury = HYDRA_TREASURY.getEthersContract(networkId);
+
+  return useQuery<number, Error>(["useHydrMintPrice", networkId], async () => {
+    const floorPrice = await treasury.getFloorPrice();
+    return parseBigNumber(floorPrice, 9);
+  });
+};
+
 // TODO: right now it is wETH market price from uniswap.
-export const useHYDRMarketPrice = () => {
+export const useHydrMarketPrice = () => {
   const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
 
   const key = hydraPriceQueryKey();
@@ -48,6 +73,19 @@ export const useHYDRSwapEvents = () => {
     const eventFilter = reserveContract.filters.Swap(null, null, null, null, null, null);
     const existing_records = await reserveContract.queryFilter(eventFilter, currentBlock - 200);
     console.log(existing_records);
+    return existing_records;
+  });
+};
+
+export const useHydrMintEvents = () => {
+  const { networkId, provider } = useWeb3Context();
+
+  const minting = HYDRA_MINTING.getEthersContract(networkId);
+  const key = hydrMintEventsQueryKey(networkId);
+  return useQuery<MintFromTreasuryEvent[], Error>(key, async () => {
+    const currentBlock = await provider.getBlockNumber();
+    const eventFilter = minting.filters.MintFromTreasury(null, null, null, null, null, null);
+    const existing_records = await minting.queryFilter(eventFilter, currentBlock - 200);
     return existing_records;
   });
 };

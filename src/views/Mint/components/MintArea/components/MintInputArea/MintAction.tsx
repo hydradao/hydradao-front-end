@@ -20,17 +20,20 @@ import { ReactComponent as DownIcon } from "src/assets/icons/arrow-down.svg";
 import { ReactComponent as FirstStepIcon } from "src/assets/icons/step-1.svg";
 import { ReactComponent as SecondStepIcon } from "src/assets/icons/step-2.svg";
 import { ReactComponent as CompleteStepIcon } from "src/assets/icons/step-complete.svg";
-import { useApproveToken } from "src/components/TokenAllowanceGuard/hooks/useApproveToken";
+import { useApproveToken, useApproveTokenSpend } from "src/components/TokenAllowanceGuard/hooks/useApproveToken";
 import TokenIcons, { AllTokenName } from "src/components/TokenIcons";
-import { ZAP_ADDRESSES } from "src/constants/addresses";
+import { HYDRA_MINTING_ADDRESSES } from "src/constants/addresses";
 import { trim } from "src/helpers";
 import { DecimalBigNumber } from "src/helpers/DecimalBigNumber/DecimalBigNumber";
-import { useBalances } from "src/hooks/useBalances";
-import { TokenWithBalance } from "src/hooks/useBalances";
+import { prettifySeconds } from "src/helpers/timeUtil";
+import { useWeb3Context } from "src/hooks";
 import { useContractAllowance } from "src/hooks/useContractAllowance";
+import { useActivate, useMint } from "src/hooks/useMinting";
+import { useHydrMintPrice } from "src/hooks/usePrices";
 import { useTestableNetworks } from "src/hooks/useTestableNetworks";
-import { useZapExecute } from "src/hooks/useZapExecute";
+import { TokenWithBalance, useBalance, useBalances } from "src/hooks/useTokenBalances";
 
+import { useNextRewardDate } from "../RewardTimer/hooks/useNextRewardDate";
 import SelectTokenModal from "./SelectTokenModal";
 import SlippageModal from "./SlippageModal";
 
@@ -57,8 +60,11 @@ type QuoteQuantity = string | number | null;
 const MintAction: React.FC = () => {
   const classes = useStyles();
 
+  const { networkId } = useWeb3Context();
+
   // TODO: change to mint function
-  const zapExecute = useZapExecute();
+  const mintMutation = useMint();
+  const activateMutation = useActivate();
 
   const [quoteToken, setQuoteToken] = useState<string | null>(null);
   const handleSelectQuoteToken = (token: string) => {
@@ -66,9 +72,7 @@ const MintAction: React.FC = () => {
     handleClose();
   };
 
-  const networks = useTestableNetworks();
-
-  const quoteTokens = useBalances(["DAI", "USDC"], networks.MAINNET);
+  const quoteTokens = useBalances(["DAI", "USDC"]);
 
   const selectedToken: TokenWithBalance | undefined = useMemo(() => {
     if (!quoteToken || !quoteTokens[quoteToken]) return undefined;
@@ -95,12 +99,26 @@ const MintAction: React.FC = () => {
   const [inputQuantity, setInputQuantity] = useState("");
   const [outputQuantity, setOutputQuantity] = useState("");
 
-  // const hydrMintPrice = useHydrPrice();
-  // const hydrBalance = useHydrBalance();
-  const hydrMintPrice = {
-    data: 1,
+  const hydrBalance = useBalance("HYDR");
+
+  const hydrMintPrice = useHydrMintPrice();
+
+  const nextRewardDate = useNextRewardDate();
+
+  const getTimerWillBeIncreasedTo = () => {
+    const rndInit = 1; // hours; // round timer starts at this
+    const rndInc = 30; // seconds; // every full unit purchased adds this much to the timer
+    const rndMax = 24; // hours; // max length a round timer can be
+    const amountUnit = 1000000000000000000; // amount / amountUnit_ = how many rndInc_ will be added to the timer
+
+    if (nextRewardDate.data) {
+      return prettifySeconds(
+        (nextRewardDate.data.getTime() - new Date().getTime()) / 1000 + Number(outputQuantity) * rndInc,
+      );
+    } else {
+      return "Loading...";
+    }
   };
-  const hydrBalance = new DecimalBigNumber("0");
 
   useEffect(() => setQuoteTokenQuantity(inputQuantity), [inputQuantity]);
 
@@ -128,7 +146,7 @@ const MintAction: React.FC = () => {
 
   const { data: tokenAllowance } = useContractAllowance(
     selectedToken ? selectedToken.addresses : {},
-    ZAP_ADDRESSES, // TODO: change it to mint contract address
+    HYDRA_MINTING_ADDRESSES,
   );
 
   /**
@@ -139,7 +157,7 @@ const MintAction: React.FC = () => {
   }, [tokenAllowance, inputQuantity]);
 
   // TODO: change it to mint contract address
-  const approveMutation = useApproveToken(selectedToken ? selectedToken.addresses : {}, ZAP_ADDRESSES);
+  const approveMutation = useApproveTokenSpend(selectedToken, HYDRA_MINTING_ADDRESSES);
 
   const onSeekApproval = async () => {
     approveMutation.mutate();
@@ -160,14 +178,16 @@ const MintAction: React.FC = () => {
     return minimumAmount.toString({ decimals: 4, trim: true });
   }, [minimumAmount]);
 
-  const onZap = async () => {
+  const onActivate = async () => {
+    activateMutation.mutate();
+  };
+
+  const onMint = async () => {
     if (selectedToken) {
-      zapExecute.mutate({
-        slippage: customSlippage,
-        sellAmount: ethers.utils.parseUnits(inputQuantity, selectedToken.decimals),
-        tokenAddress: "",
-        minimumAmount: minimumAmountString,
-        gOHM: false,
+      mintMutation.mutate({
+        minAmountOfHYDR: "0", // TODO: change to min amount
+        paymentTokenAddress: (selectedToken.addresses as any)[networkId] as string,
+        paymentTokenAmount: inputQuantity,
       });
     }
   };
@@ -176,7 +196,7 @@ const MintAction: React.FC = () => {
   if (inputQuantity && outputQuantity) {
     avgMintPrice = Number(inputQuantity) / Number(outputQuantity);
   } else {
-    avgMintPrice = hydrMintPrice.data;
+    avgMintPrice = hydrMintPrice.data || 1;
   }
 
   return (
@@ -287,14 +307,14 @@ const MintAction: React.FC = () => {
               >
                 <Box flexDirection="column" display="flex">
                   <Box flexDirection="row" display="flex" alignItems="center" justifyContent="flex-end">
-                    <ButtonBase>
+                    <ButtonBase onClick={() => onActivate()}>
                       <TokenIcons name={"HYDR"} />
                       <Box width="10px" />
                       <Typography>{"HYDR"}</Typography>
                     </ButtonBase>
                   </Box>
                   <Box flexDirection="row" display="flex" alignItems="center">
-                    <Typography color="textSecondary">{`Balance ${formatBalance(hydrBalance)}`}</Typography>
+                    <Typography color="textSecondary">{`Balance ${formatBalance(hydrBalance.data)}`}</Typography>
                   </Box>
                 </Box>
               </div>
@@ -302,6 +322,7 @@ const MintAction: React.FC = () => {
           }
         />
       </FormControl>
+
       <Box
         justifyContent="space-between"
         flexDirection="row"
@@ -328,8 +349,32 @@ const MintAction: React.FC = () => {
         {selectedToken ? (
           <Typography>{avgMintPrice ? `${avgMintPrice} ${selectedToken.name} = 1 HYDR` : `UNKOWN`}</Typography>
         ) : (
-          <Typography></Typography>
+          <Typography>{`${avgMintPrice} USD = 1 HYDR`}</Typography>
         )}
+      </Box>
+      <Box justifyContent="space-between" flexDirection="row" display="flex" marginY="8px" width="100%">
+        <Typography>
+          <Trans>Minimum You Get</Trans>
+        </Typography>
+        <Typography>{`${minimumAmountString} HYDR`}</Typography>
+      </Box>
+      <Box justifyContent="space-between" flexDirection="row" display="flex" width="100%" marginY="8px">
+        <Typography>
+          <Trans>Max Reward You Can Get</Trans>
+        </Typography>
+        <Typography>{outputQuantity || 0} PRHYDR</Typography>
+      </Box>
+      <Box justifyContent="space-between" flexDirection="row" display="flex" width="100%" marginY="8px">
+        <Typography>
+          <Trans>The Reward Is Now Worth</Trans>
+        </Typography>
+        <Typography>N/A</Typography>
+      </Box>
+      <Box justifyContent="space-between" flexDirection="row" display="flex" width="100%" marginY="8px">
+        <Typography>
+          <Trans>Your Reward Profit Is (minus what you over paid)</Trans>
+        </Typography>
+        <Typography>N/A</Typography>
       </Box>
       <Box
         justifyContent="space-between"
@@ -340,10 +385,11 @@ const MintAction: React.FC = () => {
         width="100%"
       >
         <Typography>
-          <Trans>Minimum You Get</Trans>
+          <Trans>Timer Will Be Increased To</Trans>
         </Typography>
-        <Typography>{`${minimumAmountString} HYDR`}</Typography>
+        <Typography>{getTimerWillBeIncreasedTo()}</Typography>
       </Box>
+
       {hasTokenAllowance ? (
         <Button
           fullWidth
@@ -352,14 +398,14 @@ const MintAction: React.FC = () => {
           color="primary"
           disabled={
             quoteToken == null ||
-            zapExecute.isLoading ||
+            mintMutation.isLoading ||
             outputQuantity === "" ||
             // We cannot pass a minimum amount of 0 to the mutation, so catch it here
             minimumAmountString === "0"
           }
-          onClick={onZap}
+          onClick={onMint}
         >
-          {zapExecute.isLoading ? (
+          {mintMutation.isLoading ? (
             <Trans>Pending...</Trans>
           ) : outputQuantity === "" || minimumAmountString === "0" ? (
             <Trans>Enter Amount</Trans>
@@ -405,8 +451,8 @@ const MintAction: React.FC = () => {
               className="zap-stake-button"
               variant="contained"
               color="primary"
-              disabled={!hasTokenAllowance || zapExecute.isLoading || outputQuantity === ""}
-              onClick={onZap}
+              disabled={!hasTokenAllowance || mintMutation.isLoading || outputQuantity === ""}
+              onClick={onMint}
             >
               <Box display="flex" flexDirection="row" alignItems="center">
                 <SvgIcon component={SecondStepIcon} style={buttonIconStyle} viewBox={"0 0 16 16"} />

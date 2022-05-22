@@ -6,7 +6,14 @@ import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { formatCurrency, formatNumber } from "src/helpers";
 import { parseBigNumber } from "src/helpers";
 import { useCurrentIndex } from "src/hooks/useCurrentIndex";
-import { useGohmPrice, useHYDRMarketPrice, useHYDRSwapEvents, useOhmPrice } from "src/hooks/usePrices";
+import {
+  useGohmPrice,
+  useHydrFloorPrice,
+  useHydrMarketPrice,
+  useHydrMintPrice,
+  useHYDRSwapEvents,
+  useOhmPrice,
+} from "src/hooks/usePrices";
 import {
   useMarketCap,
   useOhmCirculatingSupply,
@@ -35,35 +42,35 @@ export const MarketCap: React.FC<AbstractedMetricProps> = props => {
 };
 
 export const MintPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: marketPrice } = useHYDRMarketPrice();
+  const { data: price } = useHydrMintPrice();
 
   const _props: MetricProps = {
     ...props,
     label: t`Mint Price`,
   };
 
-  if (marketPrice) _props.metric = formatCurrency(marketPrice - 10.22, 2);
+  if (price) _props.metric = formatCurrency(price, 2);
   else _props.isLoading = true;
 
   return <Metric {..._props} />;
 };
 
 export const FloorPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: marketPrice } = useHYDRMarketPrice();
+  const { data: price } = useHydrFloorPrice();
 
   const _props: MetricProps = {
     ...props,
     label: t`Floor Price`,
   };
 
-  if (marketPrice) _props.metric = formatCurrency(Math.floor(marketPrice - 15), 1);
+  if (price) _props.metric = formatCurrency(Math.floor(price), 2);
   else _props.isLoading = true;
 
   return <Metric {..._props} />;
 };
 
 export const MarketPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: hydraPrice } = useHYDRMarketPrice();
+  const { data: hydraPrice } = useHydrMarketPrice();
   const [latestHydraPrice, setLatestHydraPrice] = useState(hydraPrice);
 
   const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
@@ -78,13 +85,15 @@ export const MarketPrice: React.FC<AbstractedMetricProps> = props => {
     label: t`Market Price`,
   };
 
-  if (latestHydraPrice) {
-    _props.metric = formatCurrency(latestHydraPrice, 2);
-  } else if (hydraPrice) {
-    _props.metric = formatCurrency(hydraPrice, 2);
-  } else {
-    _props.isLoading = true;
-  }
+  // if (latestHydraPrice) {
+  //   _props.metric = formatCurrency(latestHydraPrice, 2);
+  // } else if (hydraPrice) {
+  //   _props.metric = formatCurrency(hydraPrice, 2);
+  // } else {
+  //   _props.isLoading = true;
+  // }
+
+  _props.metric = "N/A";
 
   return <Metric {..._props} />;
 };

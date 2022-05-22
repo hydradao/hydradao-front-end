@@ -8,8 +8,9 @@ import { BigNumber, ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { formatCurrency, formatNumber } from "src/helpers";
+import { DecimalBigNumber } from "src/helpers/DecimalBigNumber/DecimalBigNumber";
 import { Providers } from "src/helpers/providers/Providers/Providers";
-import { useHYDRSwapEvents } from "src/hooks/usePrices";
+import { useHydrMintEvents } from "src/hooks/usePrices";
 import { useWeb3Context } from "src/hooks/web3Context";
 import { ExternalPool } from "src/lib/ExternalPool";
 import { NetworkId } from "src/networkDetails";
@@ -99,30 +100,37 @@ const fake_data = [
 ];
 
 const AllMints = (props: { isSmallScreen: boolean }) => {
-  const { data: events } = useHYDRSwapEvents();
-  const [records, setRecords] = useState<Array<Record>>([]);
-  const provider = Providers.getStaticProvider(NetworkId.MAINNET);
+  const { data: events } = useHydrMintEvents();
+
+  // const [records, setRecords] = useState<Array<Record>>([]);
+  // const provider = Providers.getStaticProvider(NetworkId.MAINNET);
+
   if (events) {
-    const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
+    // const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
+
     let processedEvents: Record[] = [];
     events.forEach(function (event) {
       const blockNumber = event.blockNumber.toString();
-      if (event.args.amount0Out.isZero()) {
-        return;
-      }
-      const ethString: string = formatUnits(event.args.amount0Out, 18);
 
-      const usdtString: string = formatUnits(event.args.amount1In, 6);
-      const avgPrice = Number(usdtString) / Number(ethString);
-      const wallet = event.args[0].substring(0, 6) + "..." + event.args[0].substring(38);
+      // if (event.args.amount0Out.isZero()) {
+      //   return;
+      // }
+
+      // const ethString: string = formatUnits(event.args.amount0Out, 18);
+
+      // const usdtString: string = formatUnits(event.args.amount1In, 6);
+      // const avgPrice = Number(usdtString) / Number(ethString);
+      const wallet = event.args.minter.substring(0, 6) + "..." + event.args.minter.substring(38);
+
       processedEvents.push({
         time: blockNumber,
-        inputValue: formatNumber(Number(usdtString), 2) + " UST",
-        outputValue: formatNumber(Number(ethString), 5) + " HYDR",
-        avgPrice: formatCurrency(avgPrice, 2),
+        inputValue: new DecimalBigNumber(event.args.paymentTokenAmount, 16).toString() + " DAI",
+        outputValue: new DecimalBigNumber(event.args.amountInHYDR, 16).toString() + " HYDR",
+        avgPrice: "$" + new DecimalBigNumber(event.args.avePrice, 9).toString(),
         walletAddress: wallet,
       });
     });
+
     processedEvents = processedEvents.reverse();
     if (processedEvents.length > 30) {
       processedEvents = processedEvents.slice(0, 30);

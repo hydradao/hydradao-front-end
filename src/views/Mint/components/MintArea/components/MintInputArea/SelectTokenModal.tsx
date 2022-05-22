@@ -16,7 +16,7 @@ import {
 import { ReactComponent as XIcon } from "src/assets/icons/x.svg";
 import TokenIcons, { AllTokenName } from "src/components/TokenIcons";
 import { trim } from "src/helpers";
-import { TokenWithBalance } from "src/hooks/useBalances";
+import { TokenWithBalance } from "src/hooks/useTokenBalances";
 
 function SelectTokenModal(
   handleClose: () => void,

@@ -2,6 +2,7 @@ import { Contract as EthersContract } from "@ethersproject/contracts";
 import { Provider } from "@ethersproject/providers";
 import { Signer } from "ethers";
 import { AddressMap } from "src/constants/addresses";
+import { useWeb3Context } from "src/hooks";
 import { NetworkId } from "src/networkDetails";
 
 import { Providers } from "../providers/Providers/Providers";
@@ -64,14 +65,29 @@ export class Contract<TFactory extends Factory = Factory, TAddressMap extends Ad
       throw `No ${this.name} contract in network ${networkId}.`;
     }
 
+    // TODO: improve cache based on networkId and singer address
     if (!this._contractCache[networkId]) {
       const address = this.getAddress(networkId);
       const provider = Providers.getStaticProvider(networkId as NetworkId);
 
-      this._contractCache[networkId] = this._factory.connect(address, provider) as ReturnType<TFactory["connect"]>;
+      this._contractCache[networkId] = this._factory.connect(address, provider.getSigner()) as ReturnType<
+        TFactory["connect"]
+      >;
     }
 
     return this._contractCache[networkId];
+  };
+
+  getDynamicContract = () => {
+    const { networkId } = useWeb3Context();
+    if (!this.inNetwork(networkId)) {
+      throw `No ${this.name} contract in network ${networkId}.`;
+    }
+
+    const address = this.getAddress(networkId);
+    const provider = Providers.getStaticProvider(networkId as NetworkId);
+
+    return this._factory.connect(address, provider.getSigner()) as ReturnType<TFactory["connect"]>;
   };
 
   inNetwork = (networkId: NetworkId) => {

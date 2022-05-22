@@ -4,16 +4,18 @@ import { Skeleton } from "@material-ui/lab";
 import { Metric } from "@olympusdao/component-library";
 import React from "react";
 import Countdown, { CountdownRenderProps } from "react-countdown";
-import { useNextRebaseDate } from "src/views/Stake/components/StakeArea/components/RebaseTimer/hooks/useNextRebaseDate";
 
 import { prettifySeconds } from "../../../../../../helpers/timeUtil";
+import { useNextRewardDate } from "./hooks/useNextRewardDate";
 
 type MetricProps = PropsOf<typeof Metric>;
 
 type AbstractedMetricProps = Omit<MetricProps, "metric" | "label" | "tooltip" | "isLoading">;
 
 const RewardTimer: React.FC<AbstractedMetricProps> = props => {
-  const { data: nextRebaseDate } = useNextRebaseDate();
+  const query = useNextRewardDate();
+  const nextRebaseDate = query.data;
+
   const _props = {
     ...props,
     label: `Count Down`,

@@ -8,9 +8,11 @@ import {
   DAI_ADDRESSES,
   FRAX_ADDRESSES,
   GOHM_ADDRESSES,
+  HYDR_ADDRESSES,
   LUSD_ADDRESSES,
   OHM_ADDRESSES,
   OHM_DAI_LP_ADDRESSES,
+  PRHYDR_ADDRESSES,
   SOHM_ADDRESSES,
   USDC_ADDRESSES,
   UST_ADDRESSES,
@@ -179,6 +181,24 @@ export const USDC_TOKEN = new Token({
   name: "USDC",
   decimals: 18,
   addresses: USDC_ADDRESSES,
+  factory: IERC20__factory,
+  purchaseUrl: "",
+});
+
+export const HYDR_TOKEN = new Token({
+  icons: ["USDC"],
+  name: "HYDR",
+  decimals: 18,
+  addresses: HYDR_ADDRESSES,
+  factory: IERC20__factory,
+  purchaseUrl: "",
+});
+
+export const PRHYDR_TOKEN = new Token({
+  icons: ["USDC"],
+  name: "PRHYDR",
+  decimals: 18,
+  addresses: PRHYDR_ADDRESSES,
   factory: IERC20__factory,
   purchaseUrl: "",
 });

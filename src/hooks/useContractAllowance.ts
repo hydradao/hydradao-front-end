@@ -9,11 +9,11 @@ import { useWeb3Context } from ".";
 import { useDynamicTokenContract } from "./useContract";
 
 export const contractAllowanceQueryKey = (
-  address?: string,
-  networkId?: NetworkId,
-  tokenMap?: AddressMap,
-  contractMap?: AddressMap,
-) => ["useContractAllowances", address, networkId, tokenMap, contractMap].filter(nonNullable);
+  address: string,
+  networkId: NetworkId,
+  tokenMap: AddressMap,
+  contractMap: AddressMap,
+) => ["useContractAllowances", address, networkId, tokenMap[networkId], contractMap[networkId]].filter(nonNullable);
 
 export const useContractAllowance = (tokenMap: AddressMap, contractMap: AddressMap) => {
   const token = useDynamicTokenContract(tokenMap);
