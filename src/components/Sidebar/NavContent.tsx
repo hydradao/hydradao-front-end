@@ -1,18 +1,25 @@
 import { t, Trans } from "@lingui/macro";
 import { Box, Divider, Grid, Link, makeStyles, Paper, SvgIcon, Typography } from "@material-ui/core";
+import AddBoxIcon from "@material-ui/icons/AddBox";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import CallMergeIcon from "@material-ui/icons/CallMerge";
+import LocalDrinkIcon from "@material-ui/icons/LocalDrink";
+import MultilineChartIcon from "@material-ui/icons/MultilineChart";
+import ViewStreamIcon from "@material-ui/icons/ViewStream";
 import { Icon, NavItem } from "@olympusdao/component-library";
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { trim } from "src/helpers";
 import { sortByDiscount } from "src/helpers/bonds/sortByDiscount";
 import { Environment } from "src/helpers/environment/Environment/Environment";
 import { useTestableNetworks } from "src/hooks/useTestableNetworks";
+import { TokenWithBalance, useBalance, useBalances } from "src/hooks/useTokenBalances";
 import { useWeb3Context } from "src/hooks/web3Context";
 import { BondDiscount } from "src/views/Bond/components/BondDiscount";
 import { useLiveBonds } from "src/views/Bond/hooks/useLiveBonds";
 
-import { ReactComponent as OlympusIcon } from "../../assets/icons/olympus-nav-header.svg";
+import { ReactComponent as HydraIcon } from "../../assets/icons/hydr.svg";
 import WalletAddressEns from "../TopBar/Wallet/WalletAddressEns";
-
 const useStyles = makeStyles(theme => ({
   gray: {
     color: theme.colors.gray[90],
@@ -24,17 +31,20 @@ const NavContent: React.VFC = () => {
   const { networkId } = useWeb3Context();
   const networks = useTestableNetworks();
 
+  const hydrBalance = useBalance("HYDR");
+  const prhydrBalance = useBalance("PRHYDR");
+
   return (
     <Paper className="dapp-sidebar">
       <Box className="dapp-sidebar-inner" display="flex" justifyContent="space-between" flexDirection="column">
         <div className="dapp-menu-top">
           <Box className="branding-header">
-            <Link href="https://olympusdao.finance" target="_blank">
+            <Link href="https://hydradao.finance" target="_blank">
               <SvgIcon
                 color="primary"
-                viewBox="0 0 151 100"
-                component={OlympusIcon}
-                style={{ minWidth: "151px", minHeight: "98px", width: "151px" }}
+                viewBox="0 0 32 32"
+                component={HydraIcon}
+                style={{ minWidth: "200px", minHeight: "200px", width: "200px" }}
               />
             </Link>
 
@@ -43,48 +53,72 @@ const NavContent: React.VFC = () => {
 
           <div className="dapp-menu-links">
             <div className="dapp-nav" id="navbarNav">
-              <NavItem to="/dashboard" icon="dashboard" label={t`Dashboard`} />
+              <Box style={{ marginLeft: "15px", paddingLeft: "10px", display: "flex" }}>
+                <MultilineChartIcon style={{ marginTop: "12px" }} />
+                <NavItem style={{ display: "inline-block", paddingLeft: "5px" }} to="/dashboard" label={t`Dashboard`} />
+              </Box>
 
-              <NavItem to="/stake" icon="stake" label="Mint HYDR" />
+              <Box style={{ marginLeft: "15px", paddingLeft: "10px", display: "flex" }}>
+                <AddBoxIcon style={{ marginTop: "12px" }} />
+                <NavItem style={{ display: "inline-block", paddingLeft: "5px" }} to="/mint" label="Mint HYDR" />
+              </Box>
 
-              <NavItem to="/zap" icon="zap" label="Stake HYDR" />
+              <Box style={{ marginLeft: "15px", paddingLeft: "10px", display: "flex" }}>
+                <ViewStreamIcon style={{ marginTop: "12px" }} />
+                <NavItem style={{ display: "inline-block", paddingLeft: "5px" }} to="/stake" label="Stake HYDR" />
+              </Box>
 
-              {Environment.isGiveEnabled() && <NavItem to="/give" icon="give" label="Realize prHYDR" />}
+              <Box style={{ marginLeft: "15px", paddingLeft: "10px", display: "flex" }}>
+                <CallMergeIcon style={{ marginTop: "12px" }} />
+                <NavItem
+                  style={{ display: "inline-block", paddingLeft: "5px" }}
+                  to="/give"
+                  label="Claim/Realize prHYDR"
+                />
+              </Box>
 
-              <NavItem to="/wrap" icon="wrap" label="Get/Repay WATER" />
+              <Box style={{ marginLeft: "15px", paddingLeft: "10px", display: "flex" }}>
+                <LocalDrinkIcon style={{ marginTop: "12px" }} />
+                <NavItem style={{ display: "inline-block", paddingLeft: "5px" }} to="/wrap" label="Get/Repay WATER" />
+              </Box>
 
-              <NavItem to="/wrappp" icon="wrap" label="WATER buyback" />
+              <Box style={{ marginLeft: "15px", paddingLeft: "10px", display: "flex" }}>
+                <ArrowBackIcon style={{ marginTop: "12px" }} />
+                <NavItem style={{ display: "inline-block", paddingLeft: "5px" }} to="/buyback" label="HYDR buyback" />
+              </Box>
 
               <Box className="menu-divider">
                 <Divider />
               </Box>
               <Box ml={3} mr={2} mt={1}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  {/* <Grid item xs={6}>
                     <Typography>My Portfolio</Typography>
                   </Grid>
                   <Grid container item xs={6} justifyContent="flex-end">
                     <Typography>$130.22</Typography>
-                  </Grid>
+                  </Grid> */}
                   <Grid item xs={6}>
                     <Typography>HYDR</Typography>
                   </Grid>
                   <Grid container item xs={6} justifyContent="flex-end">
-                    <Typography>$88.22</Typography>
+                    <Typography>{hydrBalance.data ? trim(hydrBalance.data.toApproxNumber(), 2) : 0} HYDR</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  {/* <Grid item xs={6}>
                     <Typography>Staked HYDR</Typography>
                   </Grid>
                   <Grid container item xs={6} justifyContent="flex-end">
                     <Typography>$88.22</Typography>
-                  </Grid>
+                  </Grid> */}
                   <Grid item xs={6}>
                     <Typography>prHYDR</Typography>
                   </Grid>
                   <Grid container item xs={6} justifyContent="flex-end">
-                    <Typography>$88.22</Typography>
+                    <Typography>
+                      {prhydrBalance.data ? trim(prhydrBalance.data.toApproxNumber(), 2) : 0} prHYDR
+                    </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  {/* <Grid item xs={6}>
                     <Typography>Claimable prHYDR</Typography>
                   </Grid>
                   <Grid container item xs={6} justifyContent="flex-end">
@@ -101,7 +135,7 @@ const NavContent: React.VFC = () => {
                   </Grid>
                   <Grid container item xs={6} justifyContent="flex-end">
                     <Typography>$88.22</Typography>
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </Box>
             </div>

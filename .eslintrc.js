@@ -35,7 +35,7 @@ module.exports = {
     "no-restricted-syntax": "off",
     "no-plusplus": "off",
     "simple-import-sort/imports": "error",
-    "unused-imports/no-unused-imports": "error",
+    // "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/ban-ts-comment": "off",

@@ -8,10 +8,13 @@ import {
   DAI_ADDRESSES,
   FRAX_ADDRESSES,
   GOHM_ADDRESSES,
+  HYDR_ADDRESSES,
   LUSD_ADDRESSES,
   OHM_ADDRESSES,
   OHM_DAI_LP_ADDRESSES,
+  PRHYDR_ADDRESSES,
   SOHM_ADDRESSES,
+  USDC_ADDRESSES,
   UST_ADDRESSES,
   V1_OHM_ADDRESSES,
   V1_SOHM_ADDRESSES,
@@ -41,6 +44,7 @@ OHM_TOKEN.customPricingFunc = async () => {
   return new DecimalBigNumber(dai.div(ohm), 9);
 };
 
+// TODO: move all the token names into constants
 export const SOHM_TOKEN = new Token({
   icons: ["sOHM"],
   name: "sOHM",
@@ -168,6 +172,33 @@ export const WBTC_TOKEN = new Token({
   name: "WBTC",
   decimals: 8,
   addresses: WBTC_ADDRESSES,
+  factory: IERC20__factory,
+  purchaseUrl: "",
+});
+
+export const USDC_TOKEN = new Token({
+  icons: ["USDC"],
+  name: "USDC",
+  decimals: 18,
+  addresses: USDC_ADDRESSES,
+  factory: IERC20__factory,
+  purchaseUrl: "",
+});
+
+export const HYDR_TOKEN = new Token({
+  icons: ["USDC"],
+  name: "HYDR",
+  decimals: 18,
+  addresses: HYDR_ADDRESSES,
+  factory: IERC20__factory,
+  purchaseUrl: "",
+});
+
+export const PRHYDR_TOKEN = new Token({
+  icons: ["USDC"],
+  name: "PRHYDR",
+  decimals: 18,
+  addresses: PRHYDR_ADDRESSES,
   factory: IERC20__factory,
   purchaseUrl: "",
 });

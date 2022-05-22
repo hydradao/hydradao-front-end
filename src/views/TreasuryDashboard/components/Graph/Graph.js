@@ -1,7 +1,9 @@
 import { t } from "@lingui/macro";
 import { useTheme } from "@material-ui/core/styles";
 import Chart from "src/components/Chart/Chart";
+import HydraChart from "src/components/Chart/HydraChart";
 import { formatCurrency, trim } from "src/helpers";
+import { useGraphPrice } from "src/hooks/usePrices";
 import { useProtocolMetrics } from "src/hooks/useProtocolMetrics";
 
 import { bulletpoints, itemType, tooltipInfoMessages, tooltipItems } from "../../treasuryData";
@@ -121,6 +123,34 @@ export const ProtocolOwnedLiquidityGraph = () => {
       expandedGraphStrokeColor={theme.palette.graphStrokeColor}
       headerSubText={`${data && trim(data[0].treasuryOhmDaiPOL, 2)}% `}
       stopColor={[["rgba(128, 204, 131, 1)", "rgba(128, 204, 131, 0)"]]}
+    />
+  );
+};
+
+export const HydraPriceGraph = () => {
+  const theme = useTheme();
+  const data = useGraphPrice();
+
+  const [current, ...others] = bulletpoints.runway;
+  const runwayBulletpoints = [{ ...current, background: theme.palette.text.primary }, ...others];
+  const colors = runwayBulletpoints.map(b => b.background);
+
+  return (
+    <HydraChart
+      type="multi"
+      data={data}
+      dataKey={["mintPrice", "floorPrice", "marketPrice"]}
+      color={theme.palette.text.primary}
+      stroke={colors}
+      headerText={t`Hydra Price Graph`}
+      headerSubText={`${data && trim(data[0].runwayCurrent, 1)} Days`}
+      dataFormat="days"
+      bulletpointColors={runwayBulletpoints}
+      itemNames={["MintPrice", "FloorPrice", "MarketPrice"]}
+      itemType={""}
+      margin={{ left: 30 }}
+      infoTooltipMessage={tooltipInfoMessages().runway}
+      expandedGraphStrokeColor={theme.palette.graphStrokeColor}
     />
   );
 };

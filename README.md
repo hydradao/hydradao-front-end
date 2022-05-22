@@ -107,3 +107,19 @@ Only the following people have merge access for the master branch.
 
 * [Join our Discord](https://discord.gg/gGZUMVDuhQ) and ask how you can get involved with the DAO!
 
+## Lint + Auto Format on Save for VS Code
+
+Command + shift + p in VS code, search for open settings (JSON), and then copy paste below to the settings. You may need to install the ESLint VS code extension if you don't have it.
+
+```
+{
+    "git.ignoreMissingGitWarning": true,
+    "security.workspace.trust.untrustedFiles": "open",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true,
+        "source.fixAll.eslint": true,
+    },
+    "editor.formatOnSave": true,
+    "javascript.format.enable": false,
+}
+```

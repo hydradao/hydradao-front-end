@@ -5,9 +5,12 @@ import {
   CrossChainMigrator__factory,
   FiatDAOContract__factory,
   FuseProxy__factory,
+  HydraTreasury__factory,
+  Minting__factory,
   OlympusProV2__factory,
   OlympusStakingv2__factory,
   PrizePool__factory,
+  UniswapV2Lp__factory,
   Zap__factory,
 } from "src/typechain";
 
@@ -18,12 +21,21 @@ import {
   FUSE_POOL_6_ADDRESSES,
   FUSE_POOL_18_ADDRESSES,
   FUSE_POOL_36_ADDRESSES,
+  HYDRA_MINTING_ADDRESSES,
+  HYDRA_TREASURY_ADDRESSES,
   MIGRATOR_ADDRESSES,
   OP_BOND_DEPOSITORY_ADDRESSES,
   PT_PRIZE_POOL_ADDRESSES,
   STAKING_ADDRESSES,
+  WETH_USDT_LP_ADDRESSES,
   ZAP_ADDRESSES,
 } from "./addresses";
+
+export const WETH_USDT_LP_CONTRACT = new Contract({
+  factory: UniswapV2Lp__factory,
+  name: "WETH USDT Contract",
+  addresses: WETH_USDT_LP_ADDRESSES,
+});
 
 export const BOND_DEPOSITORY_CONTRACT = new Contract({
   factory: BondDepository__factory,
@@ -89,4 +101,16 @@ export const BALANCER_VAULT = new Contract({
   factory: BalancerVault__factory,
   name: "Balancer Vault Contract",
   addresses: BALANCER_VAULT_ADDRESSSES,
+});
+
+export const HYDRA_MINTING = new Contract({
+  factory: Minting__factory,
+  name: "Hydra_Minting Contract",
+  addresses: HYDRA_MINTING_ADDRESSES,
+});
+
+export const HYDRA_TREASURY = new Contract({
+  factory: HydraTreasury__factory,
+  name: "Hydra Treasury Contract",
+  addresses: HYDRA_TREASURY_ADDRESSES,
 });

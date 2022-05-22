@@ -44,7 +44,7 @@ import { dark as darkTheme } from "./themes/dark.js";
 import { girth as gTheme } from "./themes/girth.js";
 import { light as lightTheme } from "./themes/light.js";
 import { multifarmDarkTheme, multifarmLightTheme } from "./themes/multifarm";
-import { Bond, Give, Stake, TreasuryDashboard, V1Stake, Wrap, Zap } from "./views";
+import { Bond, Give, Mint, Stake, TreasuryDashboard, V1Stake, Wrap, Zap } from "./views";
 import NotFound from "./views/404/NotFound";
 
 // 😬 Sorry for all the console logging
@@ -321,23 +321,12 @@ function App() {
             )}
 
             <Routes>
-              <Route path="/" element={<Navigate to="/stake" />} />
-              <Route
-                path="/stake"
-                element={
-                  newAssetsDetected || (!newAssetsDetected && !oldAssetsDetected) || !oldAssetsEnoughToMigrate ? (
-                    <Stake />
-                  ) : (
-                    <V1Stake oldAssetsDetected={oldAssetsDetected} setMigrationModalOpen={setMigrationModalOpen} />
-                  )
-                }
-              />
-              <Route
-                path="/v1-stake"
-                element={
-                  <V1Stake oldAssetsDetected={oldAssetsDetected} setMigrationModalOpen={setMigrationModalOpen} />
-                }
-              />
+              <Route path="/" element={<Navigate to="/mint" />} />
+
+              <Route path="/mint/*" element={<Mint />} />
+
+              <Route path="/stake" element={<Stake />} />
+
               <Route path="/give/*" element={<Give />} />
 
               <Route path="/olympusgive" element={<Navigate to="/give" />} />

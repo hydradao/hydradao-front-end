@@ -129,6 +129,11 @@ export class Environment {
           key: `REACT_APP_BOBA_TESTNET_NODE_URL`,
           fallback: "https://rinkeby.boba.network/",
         });
+      case NetworkId.HARDHAT:
+        return this._get({
+          key: `REACT_APP_HARDHAT_TESTNET_NODE_URL`,
+          fallback: "http://127.0.0.1:8545/",
+        });
     }
   };
 

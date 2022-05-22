@@ -59,6 +59,11 @@ function TopBar({ theme, toggleTheme, handleDrawerToggle }: TopBarProps) {
           <SvgIcon component={MenuIcon} />
         </Button>
         <Box display="flex" alignItems="center">
+          <Link to={"/mint/modal"} state={{ prevPath: location.pathname }} style={{ marginRight: "0px" }}>
+            <Button variant="contained" color="secondary">
+              <Typography>{t`Claim prHYDR rewards`}</Typography>
+            </Button>
+          </Link>
           <Link to={"/wallet"} state={{ prevPath: location.pathname }} style={{ marginRight: "0px" }}>
             <Button variant="contained" color="secondary">
               <SvgIcon component={WalletIcon} style={{ marginRight: "9px" }} />

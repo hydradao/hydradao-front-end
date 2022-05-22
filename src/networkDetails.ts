@@ -25,6 +25,8 @@ export enum NetworkId {
 
   BOBA = 288,
   BOBA_TESTNET = 28,
+
+  HARDHAT = 31337,
 }
 
 interface IAddresses {
@@ -163,6 +165,14 @@ export const addresses: IAddresses = {
     REDEEM_HELPER_ADDRESS: "",
     WSOHM_ADDRESS: "0x8cd309e14575203535ef120b5b0ab4dded0c2073",
   }, // TODO: Avalanche Mainnet addresses
+  [NetworkId.HARDHAT]: {
+    HYDR_ADDRESS: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+    PRHYDR_ADDRESS: "0x9A676e781A523b5d0C0e43731313A708CB607508",
+    TREASURY_ADDRESS: "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+    DAI_ADDRESS: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+    USDC_ADDRESS: "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+    MINTING_ADDRESS: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+  },
 };
 
 /**
@@ -307,6 +317,20 @@ export const NETWORKS: { [key: number]: INetwork } = {
     imageAltText: "Polygon Logo",
     uri: () => Providers.getProviderUrl(NetworkId.POLYGON_TESTNET),
   },
+  [NetworkId.HARDHAT]: {
+    chainName: "Hardhat Local Testnet",
+    chainId: 31337,
+    nativeCurrency: {
+      name: "Hardhat",
+      symbol: "GO",
+      decimals: 18,
+    },
+    rpcUrls: ["http://127.0.0.1:8545/"],
+    blockExplorerUrls: [""],
+    image: polygon,
+    imageAltText: "Polygon Logo",
+    uri: () => Providers.getProviderUrl(NetworkId.POLYGON_TESTNET),
+  },
 };
 
 // VIEWS FOR NETWORK is used to denote which paths should be viewable on each network
@@ -384,5 +408,15 @@ export const VIEWS_FOR_NETWORK: { [key: number]: IViewsForNetwork } = {
     bonds: false,
     network: true,
     bondsV2: false,
+  },
+  [NetworkId.HARDHAT]: {
+    dashboard: true,
+    stake: true,
+    wrap: true,
+    zap: true,
+    threeTogether: true,
+    bonds: true,
+    network: true,
+    bondsV2: true,
   },
 };

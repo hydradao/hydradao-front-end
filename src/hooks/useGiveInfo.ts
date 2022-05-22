@@ -265,7 +265,7 @@ export const useRecipientInfo = (address: string) => {
   const contract = useDynamicGiveContract(GIVE_ADDRESSES, true);
 
   const signer = provider.getSigner();
-  const gohmContract = new ethers.Contract(GOHM_ADDRESSES[networkId as keyof typeof GOHM_ADDRESSES], gOHM, signer);
+  // const gohmContract = new ethers.Contract(GOHM_ADDRESSES[networkId as keyof typeof GOHM_ADDRESSES], gOHM, signer);
 
   const query = useQuery<IUserRecipientInfo, Error>(
     recipientInfoQueryKey(address, networkId),
@@ -303,10 +303,10 @@ export const useRecipientInfo = (address: string) => {
           sumDebt = sumDebt.add(debtData[i].principalAmount);
         }
 
-        const sumAgnosticDebt = await gohmContract.balanceTo(sumDebt);
+        // const sumAgnosticDebt = await gohmContract.balanceTo(sumDebt);
 
         recipientInfo.sohmDebt = ethers.utils.formatUnits(sumDebt, "gwei");
-        recipientInfo.gohmDebt = ethers.utils.formatEther(sumAgnosticDebt);
+        // recipientInfo.gohmDebt = ethers.utils.formatEther(sumAgnosticDebt);
       } catch (e: unknown) {
         console.log(e);
       }
