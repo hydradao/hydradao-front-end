@@ -3,6 +3,7 @@ import { useTheme } from "@material-ui/core/styles";
 import Chart from "src/components/Chart/Chart";
 import HydraChart from "src/components/Chart/HydraChart";
 import { formatCurrency, trim } from "src/helpers";
+import { useGraphPrice } from "src/hooks/usePrices";
 import { useProtocolMetrics } from "src/hooks/useProtocolMetrics";
 
 import { bulletpoints, itemType, tooltipInfoMessages, tooltipItems } from "../../treasuryData";
@@ -128,9 +129,7 @@ export const ProtocolOwnedLiquidityGraph = () => {
 
 export const HydraPriceGraph = () => {
   const theme = useTheme();
-  const { data } = useProtocolMetrics();
-
-  const runway = data && data.filter(metric => metric.runway10k > 5);
+  const data = useGraphPrice();
 
   const [current, ...others] = bulletpoints.runway;
   const runwayBulletpoints = [{ ...current, background: theme.palette.text.primary }, ...others];
@@ -139,15 +138,15 @@ export const HydraPriceGraph = () => {
   return (
     <HydraChart
       type="multi"
-      data={runway}
-      dataKey={["runwayCurrent", "runway7dot5k"]}
+      data={data}
+      dataKey={["mintPrice", "floorPrice", "marketPrice"]}
       color={theme.palette.text.primary}
       stroke={colors}
-      headerText={t`Runway Available`}
+      headerText={t`Hydra Price Graph`}
       headerSubText={`${data && trim(data[0].runwayCurrent, 1)} Days`}
       dataFormat="days"
       bulletpointColors={runwayBulletpoints}
-      itemNames={tooltipItems.runway}
+      itemNames={["MintPrice", "FloorPrice", "MarketPrice"]}
       itemType={""}
       margin={{ left: 30 }}
       infoTooltipMessage={tooltipInfoMessages().runway}

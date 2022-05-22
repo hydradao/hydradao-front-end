@@ -64,7 +64,7 @@ const renderMultiLineChart = (
       tickLine={false}
       width={25}
       tickFormatter={number => (number !== 0 ? `${trim(parseFloat(number), 2)}` : "")}
-      domain={[0, "auto"]}
+      domain={["auto", "auto"]}
       allowDataOverflow={false}
     />
     <Tooltip
@@ -74,6 +74,7 @@ const renderMultiLineChart = (
     <Brush dataKey="timestamp" tickFormatter={str => format(new Date(str * 1000), "MMM dd")} />
     <Line dataKey={dataKey[0]} stroke={stroke[0]} dot={false} />;
     <Line dataKey={dataKey[1]} stroke={stroke[1]} dot={false} />;
+    <Line dataKey={dataKey[2]} stroke={stroke[2]} dot={false} />;
     {renderExpandedChartStroke(isExpanded, expandedGraphStrokeColor)}
   </LineChart>
 );

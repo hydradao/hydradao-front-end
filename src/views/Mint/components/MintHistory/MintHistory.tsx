@@ -4,20 +4,22 @@ import { Box, makeStyles, Table, TableCell, TableHead, TableRow, Typography, Zoo
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { Skeleton } from "@material-ui/lab";
 import { DataRow, OHMTokenProps, Paper, SecondaryButton, Token, TokenStack } from "@olympusdao/component-library";
-import { BigNumber } from "ethers";
-import { useState } from "react";
+import { BigNumber, ethers } from "ethers";
+import { useEffect, useState } from "react";
 import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { formatCurrency, formatNumber } from "src/helpers";
+import { Providers } from "src/helpers/providers/Providers/Providers";
+import { useHYDRSwapEvents } from "src/hooks/usePrices";
 import { useWeb3Context } from "src/hooks/web3Context";
 import { ExternalPool } from "src/lib/ExternalPool";
 import { NetworkId } from "src/networkDetails";
 
 interface Record {
-  sender: string;
-  in0: string;
-  in1: string;
-  out0: string;
-  out1: string;
+  time: string;
+  inputValue: string;
+  outputValue: string;
+  avgPrice: string;
+  walletAddress: string;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -86,48 +88,81 @@ export const MintHistory = () => {
   );
 };
 
-const data = [
+const fake_data = [
   {
-    time: "5/13/2022, 9:44:10 PM",
-    inputValue: "17.08 WATER",
-    outputValue: "1.39 HYDR",
-    avgPrice: "$12.28",
-    walletAddress: "DwNW...wwtV",
-  },
-  {
-    time: "5/13/2022, 9:40:30 PM",
-    inputValue: "30,000 USDC",
-    outputValue: "2,442.61 HYDR",
-    avgPrice: "$12.28",
-    walletAddress: "7cTW...QLZY",
+    time: "Loading",
+    inputValue: "Loading",
+    outputValue: "Loading",
+    avgPrice: "Loading",
+    walletAddress: "Loading",
   },
 ];
 
 const AllMints = (props: { isSmallScreen: boolean }) => {
+  const { data: events } = useHYDRSwapEvents();
   const [records, setRecords] = useState<Array<Record>>([]);
+  const provider = Providers.getStaticProvider(NetworkId.MAINNET);
+  if (events) {
+    const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
+    let processedEvents: Record[] = [];
+    events.forEach(function (event) {
+      const blockNumber = event.blockNumber.toString();
+      if (event.args.amount0Out.isZero()) {
+        return;
+      }
+      const ethString: string = formatUnits(event.args.amount0Out, 18);
 
-  const reserveContract = WETH_USDT_LP_CONTRACT.getEthersContract(NetworkId.MAINNET);
+      const usdtString: string = formatUnits(event.args.amount1In, 6);
+      const avgPrice = Number(usdtString) / Number(ethString);
+      const wallet = event.args[0].substring(0, 6) + "..." + event.args[0].substring(38);
+      processedEvents.push({
+        time: blockNumber,
+        inputValue: formatNumber(Number(usdtString), 2) + " UST",
+        outputValue: formatNumber(Number(ethString), 5) + " HYDR",
+        avgPrice: formatCurrency(avgPrice, 2),
+        walletAddress: wallet,
+      });
+    });
+    processedEvents = processedEvents.reverse();
+    if (processedEvents.length > 30) {
+      processedEvents = processedEvents.slice(0, 30);
+    }
 
-  reserveContract.on("Swap", (sender: string, in0: number, in1: number, out0: number, out1: number, to: string) => {
-    const record: Record = {
-      sender: sender,
-      in0: in0 + "",
-      in1: in1 + "",
-      out0: out0 + "",
-      out1: out1 + "",
-    };
-    setRecords(records.concat(record));
-  });
+    // TODO: temporarily disable auto update.
+    // reserveContract.on("Swap", (sender: string, in0: number, in1: number, out0: number, out1: number, to: string) => {
+    //   const record: Record = {
+    //     time: string;
+    //     inputValue: string;
+    //     outputValue: string;
+    //     avgPrice: string;
+    //     walletAddress: sender;
+    //   };
+    //   setRecords(records.concat(record));
+    // });
 
+    return (
+      <>
+        {processedEvents.map(row => (
+          <Row
+            time={row.time}
+            inputValue={row.inputValue}
+            outputValue={row.outputValue}
+            avgPrice={row.avgPrice}
+            walletAddress={row.walletAddress}
+          />
+        ))}
+      </>
+    );
+  }
   return (
     <>
-      {records.map(row => (
+      {fake_data.map(row => (
         <Row
-          time="fake time"
-          inputValue={row.in0}
-          outputValue={row.out0}
-          avgPrice="fakePrice"
-          walletAddress={row.sender}
+          time={row.time}
+          inputValue={row.inputValue}
+          outputValue={row.outputValue}
+          avgPrice={row.avgPrice}
+          walletAddress={row.walletAddress}
         />
       ))}
     </>

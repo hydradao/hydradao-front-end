@@ -6,7 +6,7 @@ import { WETH_USDT_LP_CONTRACT } from "src/constants/contracts";
 import { formatCurrency, formatNumber } from "src/helpers";
 import { parseBigNumber } from "src/helpers";
 import { useCurrentIndex } from "src/hooks/useCurrentIndex";
-import { useGohmPrice, useHYDRMarketPrice, useOhmPrice } from "src/hooks/usePrices";
+import { useGohmPrice, useHYDRMarketPrice, useHYDRSwapEvents, useOhmPrice } from "src/hooks/usePrices";
 import {
   useMarketCap,
   useOhmCirculatingSupply,
@@ -35,28 +35,28 @@ export const MarketCap: React.FC<AbstractedMetricProps> = props => {
 };
 
 export const MintPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: mintPrice } = useOhmPrice();
+  const { data: marketPrice } = useHYDRMarketPrice();
 
   const _props: MetricProps = {
     ...props,
     label: t`Mint Price`,
   };
 
-  if (mintPrice) _props.metric = formatCurrency(mintPrice, 2);
+  if (marketPrice) _props.metric = formatCurrency(marketPrice - 10.22, 2);
   else _props.isLoading = true;
 
   return <Metric {..._props} />;
 };
 
 export const FloorPrice: React.FC<AbstractedMetricProps> = props => {
-  const { data: marketCap } = useMarketCap();
+  const { data: marketPrice } = useHYDRMarketPrice();
 
   const _props: MetricProps = {
     ...props,
     label: t`Floor Price`,
   };
 
-  if (marketCap) _props.metric = formatCurrency(22.2, 1);
+  if (marketPrice) _props.metric = formatCurrency(Math.floor(marketPrice - 15), 1);
   else _props.isLoading = true;
 
   return <Metric {..._props} />;
