@@ -13,7 +13,7 @@ module.exports = {
     },
   },
   extends: [
-    "plugin:prettier/recommended",
+    // "plugin:prettier/recommended",
     "plugin:react-hooks/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
