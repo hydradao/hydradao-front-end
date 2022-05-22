@@ -83,7 +83,7 @@ const initModal = new Web3Modal({
     coinbasewallet: {
       package: CoinbaseWalletSDK, // Required
       options: {
-        appName: "Olympus DAO",
+        appName: "Hydra DAO",
         chainId: 1,
         rpc: NETWORKS[1].uri(),
       },
