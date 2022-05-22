@@ -1,8 +1,10 @@
 import { ContractReceipt } from "@ethersproject/contracts";
 import { useMutation, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import { useDispatch } from "react-redux";
-import { DAI_ADDRESSES, HYDR_ADDRESSES, USDC_ADDRESSES } from "src/constants/addresses";
+import { DAI_ADDRESSES, HYDR_ADDRESSES, PRHYDR_ADDRESSES, USDC_ADDRESSES } from "src/constants/addresses";
 import { HYDRA_MINTING } from "src/constants/contracts";
+import { parseBigNumber } from "src/helpers";
 import { DecimalBigNumber } from "src/helpers/DecimalBigNumber/DecimalBigNumber";
 import { useWeb3Context } from "src/hooks";
 import { balanceQueryKey } from "src/hooks/useTokenBalances";
@@ -51,9 +53,6 @@ export const useMint = () => {
 
       const amount = new DecimalBigNumber(paymentTokenAmount, 18);
 
-      console.log(amount);
-      console.log(amount.toBigNumber());
-
       const transaction = await minting.mintHYDR(minAmountOfHYDR, paymentTokenAddress, amount.toBigNumber());
 
       return transaction.wait();
@@ -69,4 +68,42 @@ export const useMint = () => {
       },
     },
   );
+};
+
+export const useClaimReward = () => {
+  const dispatch = useDispatch();
+  const client = useQueryClient();
+  const { networkId, address } = useWeb3Context();
+  const minting = HYDRA_MINTING.getEthersContract(networkId);
+
+  return useMutation<ContractReceipt, Error>(
+    async () => {
+      if (!minting) throw new Error("Token doesn't exist on current network. Please switch networks.");
+
+      const transaction = await minting.claimReward(1);
+
+      return transaction.wait();
+    },
+    {
+      onError: error => void dispatch(createErrorToast(error.message)),
+      onSuccess: async () => {
+        dispatch(createInfoToast("Successfully claimed!"));
+        await client.refetchQueries(getRewardQueryKey(networkId));
+        await client.refetchQueries(balanceQueryKey(address, PRHYDR_ADDRESSES[networkId], networkId));
+      },
+    },
+  );
+};
+
+export const getRewardQueryKey = (networkId: number) => ["useGetReward", networkId];
+
+export const useGetReward = () => {
+  const { networkId, address } = useWeb3Context();
+
+  const minting = HYDRA_MINTING.getEthersContract(networkId);
+
+  return useQuery<number, Error>(getRewardQueryKey(networkId), async () => {
+    const reward = await minting.getReward(address, 1);
+    return parseBigNumber(reward, 18);
+  });
 };
